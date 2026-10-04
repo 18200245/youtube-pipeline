@@ -1,0 +1,28 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Credentials & secrets
+client_secrets.json
+token.json
+*.pem
+
+# Output & temp directories
+output/
+_tmp_*/
+*.log
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
