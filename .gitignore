@@ -22,6 +22,7 @@ ENV/
 env/
 
 # IDE & Editor files
+*.ipynb
 .vscode/
 .idea/
 *.swp
