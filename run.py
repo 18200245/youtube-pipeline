@@ -59,7 +59,7 @@ def run_pipeline(
     video_info = fetch_rendered_info(web_app_url, start_index)
 
     if not audios_dir:
-        audios_dir = f"/content/drive/MyDrive/Content/tts_projects/{project_id}/wav"
+        audios_dir = f"/kaggle/working/VoiceVNZeroTTS/projects/{project_id}/chapters"
 
     video_file = video_info.get("game_path", "")
     title_pattern = video_info.get("title", f"Tap {start_index} | {name}")
