@@ -1,5 +1,4 @@
 from .audio import AudioGroup, AudioProcessor, compute_groups, natural_sort_key
-from .auth import get_authenticated_service
 from .config import PipelineConfig, SafeDict, extract_playlist_id
 from .constants import (
     MAX_GROUP_SECONDS,
@@ -9,8 +8,6 @@ from .constants import (
     YOUTUBE_API_VERSION,
     YOUTUBE_UPLOAD_SCOPE,
 )
-from .pipeline import Pipeline
-from .uploader import YouTubeUploader
 from .utils import (
     ffprobe_json,
     format_hms,
@@ -21,6 +18,15 @@ from .utils import (
     setup_logger,
 )
 from .video import VideoProcessor
+
+try:
+    from .auth import get_authenticated_service
+    from .uploader import YouTubeUploader
+    from .pipeline import Pipeline
+except ImportError:
+    get_authenticated_service = None
+    YouTubeUploader = None
+    Pipeline = None
 
 __all__ = [
     "PipelineConfig",

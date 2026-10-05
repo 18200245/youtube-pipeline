@@ -85,3 +85,15 @@ config = PipelineConfig(
 pipeline = Pipeline(config)
 uploaded_ids = pipeline.run()
 ```
+
+### E. Chay tu dong dong bo tu Google Apps Script (run.py)
+Lay metadata du an theo `start_index` tu Apps Script va chay tu dong:
+```powershell
+python run.py \
+  --start-index 9 \
+  --name "Truyen1" \
+  --project-id 9 \
+  --output-dir "/tmp/output" \
+  --delete-final-video
+```
+
