@@ -18,7 +18,7 @@
     "comic": {
       "title": "CHUYỂN SINH THÀNH GOBLIN",
       "subTitle": "Phát Minh Từ Kiếm Đến Súng",
-      "chapter": "TẬP 1",
+      "chapter": "TẬP {index}",
       "badge": "CHUYỂN SINH / DỊ THẾ GIỚI",
       "synopsis": "Sau một ngàn năm bị phong ấn dưới vực sâu U Minh, Huyết Ma Vương Kenjiro tỉnh giấc với sức mạnh bóng tối vô song. Đối mặt với sự phản bội của tam đại gia tộc hoàng gia, hắn đơn thương độc mã tiến về vương đô để đoạt lại những gì đã mất..."
     }
@@ -58,6 +58,10 @@
       "accountNumber": "1440260404",
       "accountHolder": "NGUYEN QUOC THINH",
       "branch": ""
+    },
+    "momo": {
+      "phone": "",
+      "name": ""
     }
   },
   "scene4": {

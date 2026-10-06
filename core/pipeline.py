@@ -62,9 +62,19 @@ class Pipeline:
         video_proc = VideoProcessor(self.work_dir, logger)
 
         # --- Buoc 2.5: Render video gioi thieu truyen bang render.py (neu duoc bat) ---
-        comic_video_path = None
         comic_json = cfg.resolved_comic_json()
+        comic_template_str = None
+        has_index_placeholder = False
         if cfg.comic_info_enable and comic_json and os.path.exists(comic_json):
+            try:
+                with open(comic_json, "r", encoding="utf-8") as f:
+                    comic_template_str = f.read()
+                has_index_placeholder = "{index}" in comic_template_str
+            except Exception as e:
+                logger.warning("Khong doc duoc template comic_json: %s", e)
+
+        comic_video_path = None
+        if cfg.comic_info_enable and comic_json and os.path.exists(comic_json) and not has_index_placeholder:
             logger.info("Dang tao video gioi thieu truyen tu file json: %s ...", comic_json)
             comic_video_path = video_proc.render_comic_video(
                 config_json=comic_json,
@@ -80,6 +90,21 @@ class Pipeline:
             logger.info("XU LY GROUP %d / %d (index video = %d)", g.index_in_run + 1, len(groups), current_index)
             logger.info("-" * 70)
 
+            # Render video gioi thieu truyen rieng cho tap nay neu co placeholder {index}
+            group_comic_video = comic_video_path
+            temp_comic_to_clean = None
+            if cfg.comic_info_enable and comic_template_str and has_index_placeholder:
+                group_comic_json = os.path.join(self.work_dir, f"_comic_config_{current_index}.json")
+                with open(group_comic_json, "w", encoding="utf-8") as f:
+                    f.write(comic_template_str.replace("{index}", str(current_index)))
+                group_comic_video = video_proc.render_comic_video(
+                    config_json=group_comic_json,
+                    out_path=os.path.join(self.work_dir, f"_comic_intro_{current_index}.webm"),
+                    mode=cfg.comic_render_mode,
+                )
+                safe_remove(group_comic_json, logger)
+                temp_comic_to_clean = group_comic_video
+
             # --- Buoc 3: cat audio group + ghep video ---
             segment_audio = audio_proc.extract_segment(master_audio, g.start, g.duration, g.index_in_run)
             group_video = video_proc.build_group_video(
@@ -88,11 +113,14 @@ class Pipeline:
                 idx=g.index_in_run,
                 duration=g.duration,
                 intro_video=cfg.resolved_intro_video(),
-                comic_video=comic_video_path,
+                comic_video=group_comic_video,
                 outro_video=cfg.resolved_outro_video(),
                 bg_music=cfg.background_music,
                 bg_volume=cfg.bg_music_volume,
             )
+
+            if temp_comic_to_clean:
+                safe_remove(temp_comic_to_clean, logger)
 
             final_dest = os.path.join(cfg.output_dir, f"{cfg.name}_tap_{current_index}.mp4")
             shutil.move(group_video, final_dest)

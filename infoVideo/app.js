@@ -432,6 +432,14 @@ class RemotionEngine {
     if (chkS2) chkS2.checked = s2.enabled !== false;
     setVal('edit-s2-duration', s2.duration || 4.5);
 
+    const comments = s2.comments || [];
+    for (let i = 0; i < 3; i++) {
+      const c = comments[i] || {};
+      setVal(`edit-comment-${i + 1}-user`, c.user);
+      setVal(`edit-comment-${i + 1}-time`, c.time);
+      setVal(`edit-comment-${i + 1}-text`, c.text);
+    }
+
     const s3 = this.config.scene3 || {};
     const bk = s3.bank || {};
     const mo = s3.momo || {};
@@ -449,23 +457,71 @@ class RemotionEngine {
 
   saveDrawerInputs() {
     if (!this.config) return;
-    this.config.scene1.channel.name = document.getElementById('edit-channel-name').value;
-    this.config.scene1.comic.title = document.getElementById('edit-comic-title').value;
-    this.config.scene1.comic.chapter = document.getElementById('edit-comic-chapter').value;
-    this.config.scene1.comic.synopsis = document.getElementById('edit-comic-synopsis').value;
-    this.config.scene1.duration = parseFloat(document.getElementById('edit-s1-duration').value) || 5.0;
 
-    this.config.scene2.enabled = document.getElementById('edit-s2-enabled').checked;
-    this.config.scene2.duration = parseFloat(document.getElementById('edit-s2-duration').value) || 4.5;
+    this.config.scene1 = this.config.scene1 || {};
+    this.config.scene1.channel = this.config.scene1.channel || {};
+    this.config.scene1.comic = this.config.scene1.comic || {};
 
-    this.config.scene3.bank.bankName = document.getElementById('edit-bank-name').value;
-    this.config.scene3.bank.accountNumber = document.getElementById('edit-bank-account').value;
-    this.config.scene3.bank.accountHolder = document.getElementById('edit-bank-holder').value;
-    this.config.scene3.momo.phone = document.getElementById('edit-momo-phone').value;
-    this.config.scene3.duration = parseFloat(document.getElementById('edit-s3-duration').value) || 5.0;
+    const elChName = document.getElementById('edit-channel-name');
+    if (elChName) this.config.scene1.channel.name = elChName.value;
 
-    this.config.scene4.enabled = document.getElementById('edit-s4-enabled').checked;
-    this.config.scene4.duration = parseFloat(document.getElementById('edit-s4-duration').value) || 4.0;
+    const elCmTitle = document.getElementById('edit-comic-title');
+    if (elCmTitle) this.config.scene1.comic.title = elCmTitle.value;
+
+    const elCmChap = document.getElementById('edit-comic-chapter');
+    if (elCmChap) this.config.scene1.comic.chapter = elCmChap.value;
+
+    const elCmSyn = document.getElementById('edit-comic-synopsis');
+    if (elCmSyn) this.config.scene1.comic.synopsis = elCmSyn.value;
+
+    const elS1Dur = document.getElementById('edit-s1-duration');
+    if (elS1Dur) this.config.scene1.duration = parseFloat(elS1Dur.value) || 5.0;
+
+    this.config.scene2 = this.config.scene2 || {};
+    const elS2En = document.getElementById('edit-s2-enabled');
+    if (elS2En) this.config.scene2.enabled = elS2En.checked;
+
+    const elS2Dur = document.getElementById('edit-s2-duration');
+    if (elS2Dur) this.config.scene2.duration = parseFloat(elS2Dur.value) || 4.5;
+
+    this.config.scene2.comments = this.config.scene2.comments || [];
+    for (let i = 0; i < 3; i++) {
+      const uEl = document.getElementById(`edit-comment-${i + 1}-user`);
+      const tEl = document.getElementById(`edit-comment-${i + 1}-time`);
+      const txtEl = document.getElementById(`edit-comment-${i + 1}-text`);
+
+      this.config.scene2.comments[i] = {
+        user: uEl ? uEl.value : (this.config.scene2.comments[i]?.user || ''),
+        time: tEl ? tEl.value : (this.config.scene2.comments[i]?.time || ''),
+        text: txtEl ? txtEl.value : (this.config.scene2.comments[i]?.text || '')
+      };
+    }
+
+    this.config.scene3 = this.config.scene3 || {};
+    this.config.scene3.bank = this.config.scene3.bank || {};
+    this.config.scene3.momo = this.config.scene3.momo || {};
+
+    const elBkName = document.getElementById('edit-bank-name');
+    if (elBkName) this.config.scene3.bank.bankName = elBkName.value;
+
+    const elBkAcc = document.getElementById('edit-bank-account');
+    if (elBkAcc) this.config.scene3.bank.accountNumber = elBkAcc.value;
+
+    const elBkHolder = document.getElementById('edit-bank-holder');
+    if (elBkHolder) this.config.scene3.bank.accountHolder = elBkHolder.value;
+
+    const elMoPhone = document.getElementById('edit-momo-phone');
+    if (elMoPhone) this.config.scene3.momo.phone = elMoPhone.value;
+
+    const elS3Dur = document.getElementById('edit-s3-duration');
+    if (elS3Dur) this.config.scene3.duration = parseFloat(elS3Dur.value) || 5.0;
+
+    this.config.scene4 = this.config.scene4 || {};
+    const elS4En = document.getElementById('edit-s4-enabled');
+    if (elS4En) this.config.scene4.enabled = elS4En.checked;
+
+    const elS4Dur = document.getElementById('edit-s4-duration');
+    if (elS4Dur) this.config.scene4.duration = parseFloat(elS4Dur.value) || 4.0;
 
     this.applyConfigToDOM();
     this.rebuildTimeline();
@@ -749,6 +805,7 @@ class RemotionEngine {
     const btnDownload = document.getElementById('btn-download-config');
     if (btnDownload) {
       btnDownload.addEventListener('click', () => {
+        this.saveDrawerInputs();
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.config, null, 2));
         const dlAnchor = document.createElement('a');
         dlAnchor.setAttribute("href", dataStr);

@@ -4,19 +4,30 @@
 run.py
 ======
 Tu dong lay metadata tu Google Apps Script va chay pipeline YouTube.
+
+Luong comic JSON:
+  - Apps Script tra ve `comic_json` la mot URL (…/exec?id=…&type=json&index=N),
+    trong do {index} da duoc dien san theo so tap.
+  - run.py tai noi dung JSON ve file tam trong output-dir (comic_<index>.json),
+    sau do gan duong dan file tam nay vao PipelineConfig.comic_json.
+  - Neu --comic-json la duong dan file local thi dung truc tiep; neu la URL thi tai ve nhu tren.
+
 Cac tham so chinh:
   --start-index: Thu tu tap (index) bat dau
   --name: Ten du an / series
   --project-id: ID du an TTS tren Google Drive
-  --output-dir: Thu muc luu video output (mac dinh: /tmp/output)
-  --delete-final-video / --no-delete-final-video: Xoa video sau khi upload thanh cong (mac dinh: True)
+  --output-dir: Thu muc luu video output + file json tam
+  --delete-final-video / --no-delete-final-video: Xoa video sau khi upload (mac dinh: True)
   --keep-audio: Giu lai master audio sau khi xu ly (mac dinh: False)
+  --keep-comic-json: Giu lai file comic json tam sau khi chay (mac dinh: xoa)
 """
 
 import argparse
+import json
+import os
 import sys
 from typing import List, Optional
-import os
+
 import requests
 
 DEFAULT_OUTPUT_DIR = "/kaggle/working/output" if os.path.exists("/kaggle/working") else "./output"
@@ -43,6 +54,40 @@ def fetch_rendered_info(web_app_url: str, start_index: int) -> dict:
     return data["data"]
 
 
+def is_url(value: Optional[str]) -> bool:
+    return bool(value) and value.strip().lower().startswith(("http://", "https://"))
+
+
+def download_comic_json(url: str, output_dir: str, start_index: int) -> str:
+    """Tai noi dung comic JSON tu URL (Apps Script) ve file tam trong output_dir.
+
+    Tra ve duong dan tuyet doi cua file tam.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"Dang tai comic JSON: {url}")
+
+    resp = requests.get(url, timeout=60)
+    resp.raise_for_status()
+
+    try:
+        data = resp.json()
+    except ValueError as exc:
+        raise RuntimeError(
+            f"Noi dung comic JSON khong hop le (khong phai JSON): {resp.text[:200]}"
+        ) from exc
+
+    # Apps Script tra {"status": "error", "message": ...} khi khong tim thay / JSON sai
+    if isinstance(data, dict) and data.get("status") == "error":
+        raise RuntimeError(f"Apps Script bao loi khi lay comic JSON: {data.get('message')}")
+
+    local_path = os.path.abspath(os.path.join(output_dir, f"comic_{start_index}.json"))
+    with open(local_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    print(f"Da luu comic JSON tam: {local_path}")
+    return local_path
+
+
 def run_pipeline(
     start_index: int,
     name: str,
@@ -55,13 +100,14 @@ def run_pipeline(
     token_file: str = "token.json",
     noauth_local_webserver: bool = True,
     web_app_url: str = DEFAULT_WEB_APP_URL,
-    intro_enable: bool = True,
-    outro_enable: bool = True,
+    intro_enable: Optional[bool] = None,
+    outro_enable: Optional[bool] = None,
     intro_video: Optional[str] = None,
     outro_video: Optional[str] = None,
     comic_json: Optional[str] = None,
     comic_info_enable: bool = True,
     comic_render_mode: str = "frame",
+    keep_comic_json: bool = False,
 ) -> List[str]:
     """Lay metadata tu Web App va thuc thi Pipeline."""
     print(f"Dang lay thong tin render tu Web App voi index={start_index}...")
@@ -84,18 +130,20 @@ def run_pipeline(
     bg_music_path = video_info.get("background_music") or None
     bg_music_volume = str(video_info.get("bg_music_volume", "0.2"))
 
-    # Lay them cac thong tin intro/outro/comic neu chua truyen tu command line
+    # Uu tien: tham so command line > Web App > mac dinh
     if intro_video is None:
-        intro_video = video_info.get("intro_video") or video_info.get("info_video") or None
+        intro_video = video_info.get("intro_video") or None
     if outro_video is None:
         outro_video = video_info.get("outro_video") or None
     if comic_json is None:
-        comic_json = video_info.get("comic_json") or video_info.get("info_json") or None
+        comic_json = video_info.get("comic_json") or None
 
-    if "intro_enable" in video_info and isinstance(video_info["intro_enable"], bool):
-        intro_enable = video_info["intro_enable"]
-    if "outro_enable" in video_info and isinstance(video_info["outro_enable"], bool):
-        outro_enable = video_info["outro_enable"]
+    if intro_enable is None:
+        server_val = video_info.get("intro_enable")
+        intro_enable = server_val if isinstance(server_val, bool) else True
+    if outro_enable is None:
+        server_val = video_info.get("outro_enable")
+        outro_enable = server_val if isinstance(server_val, bool) else True
 
     try:
         sample_title = title_pattern.format(index=start_index)
@@ -103,6 +151,18 @@ def run_pipeline(
         sample_title = title_pattern
 
     print(f"Da lay cau hinh thanh cong. Tieu de mau: '{sample_title}'")
+
+    # Tai comic JSON (neu la URL) ve file tam trong output_dir
+    temp_comic_path: Optional[str] = None
+    if comic_info_enable and comic_json:
+        if is_url(comic_json):
+            temp_comic_path = download_comic_json(comic_json, output_dir, start_index)
+            comic_json = temp_comic_path
+        elif not os.path.exists(comic_json):
+            raise FileNotFoundError(f"Khong tim thay file comic JSON: {comic_json}")
+    elif comic_info_enable and not comic_json:
+        print("Canh bao: bat comic info nhung khong co comic_json -> bo qua video gioi thieu truyen.")
+        comic_info_enable = False
 
     from core import Pipeline, PipelineConfig
 
@@ -134,8 +194,16 @@ def run_pipeline(
         keep_master_audio=keep_audio,
     )
 
-    pipeline = Pipeline(config)
-    video_ids = pipeline.run()
+    try:
+        pipeline = Pipeline(config)
+        video_ids = pipeline.run()
+    finally:
+        if temp_comic_path and not keep_comic_json and os.path.exists(temp_comic_path):
+            try:
+                os.remove(temp_comic_path)
+                print(f"Da xoa file comic JSON tam: {temp_comic_path}")
+            except OSError as exc:
+                print(f"Khong xoa duoc file tam {temp_comic_path}: {exc}", file=sys.stderr)
 
     print("\nCac video da upload:")
     for vid in video_ids:
@@ -148,29 +216,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Chay YouTube Video Automation Pipeline lay metadata tu Web App"
     )
+    parser.add_argument("--start-index", type=int, required=True, help="Thu tu tap (index) bat dau")
+    parser.add_argument("--name", type=str, required=True, help="Ten du an / bo truyen")
     parser.add_argument(
-        "--start-index",
-        type=int,
-        required=True,
-        help="Thu tu tap (index) bat dau",
-    )
-    parser.add_argument(
-        "--name",
-        type=str,
-        required=True,
-        help="Ten du an / bo truyen",
-    )
-    parser.add_argument(
-        "--project-id",
-        type=str,
-        required=True,
-        help="ID du an TTS tren Google Drive (vd: 9)",
+        "--project-id", type=str, required=True, help="ID du an TTS tren Google Drive (vd: 9)"
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default=DEFAULT_OUTPUT_DIR,
-        help=f"Thu muc luu video ket qua (mac dinh: {DEFAULT_OUTPUT_DIR})",
+        help=f"Thu muc luu video ket qua va file json tam (mac dinh: {DEFAULT_OUTPUT_DIR})",
     )
     parser.add_argument(
         "--delete-final-video",
@@ -191,48 +246,37 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Giu lai file master audio sau khi hoan tat (mac dinh: False)",
     )
 
-    # Tham so intro / outro / video gioi thieu truyen
+    # Intro / outro: mac dinh None -> lay theo Web App; truyen co thi ghi de Web App
     parser.add_argument(
-        "--intro-enable",
-        action="store_true",
-        default=True,
-        help="Bat video intro (mac dinh: True)",
+        "--intro-enable", action="store_const", const=True, dest="intro_enable", default=None,
+        help="Bat video intro (ghi de gia tri tu Web App)",
     )
     parser.add_argument(
-        "--no-intro-enable",
-        action="store_false",
-        dest="intro_enable",
-        help="Tat video intro",
+        "--no-intro-enable", action="store_const", const=False, dest="intro_enable",
+        help="Tat video intro (ghi de gia tri tu Web App)",
     )
     parser.add_argument(
-        "--outro-enable",
-        action="store_true",
-        default=True,
-        help="Bat video outro (mac dinh: True)",
+        "--outro-enable", action="store_const", const=True, dest="outro_enable", default=None,
+        help="Bat video outro (ghi de gia tri tu Web App)",
     )
     parser.add_argument(
-        "--no-outro-enable",
-        action="store_false",
-        dest="outro_enable",
-        help="Tat video outro",
+        "--no-outro-enable", action="store_const", const=False, dest="outro_enable",
+        help="Tat video outro (ghi de gia tri tu Web App)",
     )
-    parser.add_argument(
-        "--intro-video",
-        type=str,
-        default=None,
-        help="Duong dan file video intro",
-    )
-    parser.add_argument(
-        "--outro-video",
-        type=str,
-        default=None,
-        help="Duong dan file video outro",
-    )
+    parser.add_argument("--intro-video", type=str, default=None, help="Duong dan file video intro")
+    parser.add_argument("--outro-video", type=str, default=None, help="Duong dan file video outro")
     parser.add_argument(
         "--comic-json",
         type=str,
         default=None,
-        help="Duong dan file JSON truyen de render video gioi thieu (dung render.py)",
+        help="File JSON truyen (duong dan local hoac URL). Mac dinh lay URL tu Web App, "
+        "tai ve file tam trong output-dir",
+    )
+    parser.add_argument(
+        "--keep-comic-json",
+        action="store_true",
+        default=False,
+        help="Giu lai file comic JSON tam sau khi chay xong (mac dinh: xoa)",
     )
     parser.add_argument(
         "--comic-info-enable",
@@ -253,12 +297,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Che do render video gioi thieu truyen: frame hoac realtime (mac dinh: frame)",
     )
 
-    # Cac tham so tuy chon bo sung
     parser.add_argument(
-        "--audios-dir",
-        type=str,
-        default=None,
-        help="Ghi de thu muc audio (mac dinh dung project_id)",
+        "--audios-dir", type=str, default=None, help="Ghi de thu muc audio (mac dinh dung project_id)"
     )
     parser.add_argument(
         "--client-secrets-file",
@@ -273,10 +313,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="File OAuth token.json (mac dinh: token.json)",
     )
     parser.add_argument(
-        "--web-app-url",
-        type=str,
-        default=DEFAULT_WEB_APP_URL,
-        help="URL Google Apps Script API",
+        "--web-app-url", type=str, default=DEFAULT_WEB_APP_URL, help="URL Google Apps Script API"
     )
     parser.add_argument(
         "--local-webserver",
@@ -312,6 +349,7 @@ def main() -> None:
             comic_json=args.comic_json,
             comic_info_enable=args.comic_info_enable,
             comic_render_mode=args.comic_render_mode,
+            keep_comic_json=args.keep_comic_json,
         )
     except Exception as exc:
         print(f"\n[LOI] {exc}", file=sys.stderr)
