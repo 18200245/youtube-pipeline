@@ -1,0 +1,86 @@
+{
+  "general": {
+    "fps": 30,
+    "width": 1920,
+    "height": 1080,
+    "themeColor": "#ffffff",
+    "accentColor": "#ffffff",
+    "goldColor": "#ffffff",
+    "bgColor": "#000000"
+  },
+  "scene1": {
+    "enabled": true,
+    "duration": 5.0,
+    "channel": {
+      "name": "GÀ VÀNG",
+      "handle": "@yellowchickenaudio"
+    },
+    "comic": {
+      "title": "CHUYỂN SINH THÀNH GOBLIN",
+      "subTitle": "Phát Minh Từ Kiếm Đến Súng",
+      "chapter": "TẬP 1",
+      "badge": "CHUYỂN SINH / DỊ THẾ GIỚI",
+      "synopsis": "Sau một ngàn năm bị phong ấn dưới vực sâu U Minh, Huyết Ma Vương Kenjiro tỉnh giấc với sức mạnh bóng tối vô song. Đối mặt với sự phản bội của tam đại gia tộc hoàng gia, hắn đơn thương độc mã tiến về vương đô để đoạt lại những gì đã mất..."
+    }
+  },
+  "scene2": {
+    "enabled": true,
+    "duration": 4.5,
+    "title": "BÌNH LUẬN NỔI BẬT CỦA KHÁN GIẢ",
+    "subTitle": "TOP COMMENTS & PHẢN HỒI HAY NHẤT",
+    "comments": [
+      {
+        "user": "Minh Tuấn Mang1a",
+        "time": "05/10/2026",
+        "text": "Nói thẳng ra, hai cuốn sách đầu của Ô Tặc đều không phải là món ăn của ta, nhưng Diệt Vận và Áo thuật ở phía trước nhất, đều là tiên thảo của ta, cho nên cảm giác của ta đối với tác giả này khá phức tạp.Nhưng cuốn sách này, có thể nói là cuốn tốt nhất mà ta thấy trong ba tháng qua, thế giới quan vĩ đại hoàn chỉnh và tinh xảo, nhân vật chính cẩn thận điềm tĩnh nhưng không thiếu lạc quan. Nói thế này đi, khi ta xem cuốn sách này, quả thực rất mỉm cười, mang một cảm giác tận hưởng sự vui vẻ khi đọc sách, muốn so với các vị thần khác, Ô Tặc đã đưa ra câu trả lời tốt nhất của mình"
+      },
+      {
+        "user": "Huyền Trang Anime",
+        "time": "04/10/2026",
+        "text": "Thiết lập thế giới quan dày dặn và khổng lồ, hệ thống sức mạnh đủ mới mẻ và tuần tự tiến triển, phong cách kể chuyện một cách vững vàng cùng bảo đảm cương lược như mọi khi, Ô Tặc lại quay trở về. Xuyên việt quỷ dị và thế giới quan mang chút phong cách kinh dị, cùng với từng sự trùng hợp khiến cuốn sách này ngay từ đầu đã đi vào chủ đề: tìm kiếm bí mật xuyên việt cũng như người dẫn chương trình trùng hợp. Nhìn từ thiết lập tôn quý của Ô Tặc Đệ Nhất, lời nói vô tâm của nhân vật chính Klein, nói không chừng chính là nhắm thẳng vào lõi vận mệnh, Vua Hoàng Hắc may mắn, chủ nhân của sương mù. Chẳng lẽ lại là một bản đích chỉ định một đời sao? Hãy để chúng ta chờ xem. Ưu điểm: Có kiên nhẫn kể chuyện, dùng huyền nghi và văn bút để dẫn dắt cốt truyện chứ không phải theo dòng chảy lớn, đủ thấy thành ý. Hơn nữa sau khi trải qua tông sư cẩu lương, Ô tặc dường như cũng chẳng còn hứng thú tiếp tục rải cẩu lương nữa, đây là một tin tốt."
+      },
+      {
+        "user": "Hoàng Nam Comic",
+        "time": "02/10/2026",
+        "text": "Nhân phẩm của Ô Tặc không cần đợi đến khi đủ số chữ (Bởi vì quá bận rộn đã lâu không tìm sách mới 233) Cuốn sách này quả thực có thể mang lại kỳ vọng vô cùng lớn. Trước hết nói về giá trị mong đợi: máy hơi nước giai đoạn đầu cách mạng công nghiệp, sức mạnh siêu phàm thần bí quỷ dị, thế giới của kẻ xuyên không tiền nhiệm đã cải tạo, ngón tay vàng xuyên qua, ngón tay vàng độc nhất có một bản nhận ra chữ Hán, ngón tay vàng của thủ đoạn thần tiên (mang người vào nhóm 2333). Nếu là ở chỗ những người viết khác, bàn tay vàng lớn như vậy cơ bản sẽ nhanh chóng sụp đổ mà thôi, nhưng Ô Tặc có thể cho người ta đủ tự tin. Tại sao lương thảo: Vốn dĩ là một kẻ ô tặc đã thành thần từ tính câu chuyện, ý tưởng và sáng tạo, sau khi có vợ, phong cách tổng thể ngày càng nghiêng về ấm áp, tuy có thể dùng làm chất điều chỉnh xuất sắc trong cốt truyện căng thẳng kích thích, nhưng dưới ngòi bút của bọn ô tặc lại càng trở thành tình tiết nhỏ có thể kết hợp với cốt truyện. Nhưng rõ ràng cuộc sống ấm áp của cuốn sách này quá đầy đủ, đến mức làm dịu đi bầu không khí quỷ bí nghiêm trọng."
+      }
+    ]
+  },
+  "scene3": {
+    "enabled": true,
+    "duration": 5.0,
+    "title": "MỜI MÌNH CAFE",
+    "subTitle": "",
+    "message": "",
+    "qrImage": "assets/qr_code.png",
+    "bank": {
+      "bankName": "BIDV (Ngân hàng TMCP Đầu tư và Phát triển Việt Nam)",
+      "accountNumber": "1440260404",
+      "accountHolder": "NGUYEN QUOC THINH",
+      "branch": ""
+    }
+  },
+  "scene4": {
+    "enabled": true,
+    "duration": 4.0,
+    "title": "LƯU Ý QUAN TRỌNG",
+    "subTitle": "NOTICE & DISCLAIMER TỪ KÊNH",
+    "items": [
+      {
+        "badge": "LỊCH RA TẬP",
+        "title": "Lịch Chiếu Cố Định",
+        "desc": "Tập mới lên sóng vào lúc 19:30 mỗi tối thứ 2, 4, 6 và Chủ Nhật. Đừng quên bật chuông thông báo!"
+      },
+      {
+        "badge": "BẢN QUYỀN",
+        "title": "Tôn Trọng Tác Giả & Họa Sĩ",
+        "desc": "Video phục vụ mục đích giới thiệu truyện và phi thương mại. Mọi bản quyền hình ảnh thuộc về tác giả gốc."
+      },
+      {
+        "badge": "TƯƠNG TÁC",
+        "title": "Cộng Đồng Giao Lưu",
+        "desc": "Bấm Like, Share và Subscribe kênh để tham gia vào cộng đồng những người đam mê Manga cùng chúng mình nhé!"
+      }
+    ]
+  }
+}

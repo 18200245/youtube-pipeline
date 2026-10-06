@@ -1,0 +1,1088 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400;1,700&family=Montserrat:wght@700;900&display=swap');
+
+/* Local Manga Custom Font (UTM-Azuki) */
+@font-face {
+  font-family: 'UTM-Azuki';
+  src: url('fonts/UTM-Azuki.ttf') format('truetype'),
+       url('assets/fonts/UTM-Azuki.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Pure Monochrome Black & White Palette */
+  --primary: #ffffff;
+  --primary-glow: rgba(255, 255, 255, 0.3);
+  --accent: #ffffff;
+  --accent-glow: rgba(255, 255, 255, 0.25);
+  --gold: #ffffff;
+  --bg-dark: #000000;
+  --card-bg: rgba(14, 14, 14, 0.94);
+  --card-border: rgba(255, 255, 255, 0.35);
+  --text-muted: #a3a3a3;
+  --font-manga: 'UTM-Azuki', 'Bangers', cursive, sans-serif;
+  --font-body: 'Be Vietnam Pro', sans-serif;
+  --font-display: 'UTM-Azuki', 'Montserrat', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  color: #ffffff;
+  font-family: var(--font-body);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* App Container */
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  position: relative;
+}
+
+/* Header bar for Studio */
+.studio-header {
+  height: 52px;
+  background: #0a0a0a;
+  border-bottom: 1px solid #222222;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 100;
+}
+
+.studio-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.studio-badge {
+  background: #ffffff;
+  color: #000000;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  font-family: var(--font-display);
+}
+
+.studio-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-studio {
+  background: #141414;
+  color: #e5e5e5;
+  border: 1px solid #333333;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-studio:hover {
+  background: #242424;
+  color: #fff;
+  border-color: #666666;
+}
+
+.btn-primary {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  font-weight: 800;
+}
+
+.btn-primary:hover {
+  background: #e0e0e0;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.4);
+}
+
+/* Viewport Area */
+.studio-viewport {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: radial-gradient(circle at center, #151515 0%, #050505 100%);
+  overflow: hidden;
+  padding: 20px;
+}
+
+/* Remotion Canvas Stage (Strict 1920x1080) */
+#stage-container {
+  width: 1920px;
+  height: 1080px;
+  transform-origin: center center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 0 1px #333333;
+  position: absolute;
+  overflow: hidden;
+  background: var(--bg-dark);
+}
+
+/* Render Mode styling (when rendered via python/headless) */
+body.render-mode .studio-header,
+body.render-mode .studio-timeline,
+body.render-mode .editor-drawer {
+  display: none !important;
+}
+
+body.render-mode .studio-viewport {
+  padding: 0;
+  background: none;
+}
+
+body.render-mode #stage-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: none !important;
+  box-shadow: none;
+}
+
+/* =======================================================
+   REMOTION CANVAS: MANGA MONOCHROME AESTHETICS & SCENES
+   ======================================================= */
+
+.remotion-root {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  overflow: hidden;
+  background: #050505;
+}
+
+/* Background Layers */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Manga Speedlines (Black & White) */
+.manga-speedlines {
+  position: absolute;
+  inset: -100px;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.035) 0deg 2deg,
+    transparent 2deg 6deg,
+    rgba(255, 255, 255, 0.015) 6deg 8deg,
+    transparent 8deg 14deg
+  );
+  opacity: 0.9;
+  animation: speedlinesPulse 8s linear infinite;
+}
+
+@keyframes speedlinesPulse {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.04) rotate(0.8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Halftone Screentone Pattern (Pure Manga Screentone) */
+.manga-screentone {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  opacity: 0.7;
+}
+
+/* Vignette */
+.manga-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, 0.8) 85%, #000000 100%);
+}
+
+/* Comic Frame Border & Accents (Monochrome) */
+.comic-frame-border {
+  position: absolute;
+  inset: 28px;
+  border: 3px solid #ffffff;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.comic-frame-border::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+}
+
+.comic-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 4px solid #ffffff;
+  z-index: 51;
+}
+.comic-corner.top-left { top: 22px; left: 22px; border-right: none; border-bottom: none; }
+.comic-corner.top-right { top: 22px; right: 22px; border-left: none; border-bottom: none; }
+.comic-corner.bottom-left { bottom: 22px; left: 22px; border-right: none; border-top: none; }
+.comic-corner.bottom-right { bottom: 22px; right: 22px; border-left: none; border-top: none; }
+
+/* Scene Container */
+.scene-wrapper {
+  position: absolute;
+  inset: 0;
+  padding: 60px 80px;
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.scene-wrapper.active {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* =======================================================
+   SCENE 1: CHANNEL & COMIC INTRO (MANGA INK MONOCHROME)
+   ======================================================= */
+#scene-1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 100px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Manga Publication Seal (Channel Info in Top-Left) */
+.manga-channel-badge-box {
+  position: absolute;
+  top: 46px;
+  left: 56px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  background: #0d0d0d;
+  border: 3px solid #ffffff;
+  padding: 12px 34px 12px 18px;
+  border-radius: 10px;
+  box-shadow: 8px 8px 0px #ffffff, 0 10px 30px rgba(0, 0, 0, 0.8);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+}
+
+/* Pure CSS First-Letter Avatar */
+.channel-avatar-css {
+  width: 72px;
+  height: 72px;
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 3px solid #000000;
+  box-shadow: 0 0 0 3px #ffffff;
+  text-transform: uppercase;
+}
+
+.channel-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.channel-name {
+  font-size: 26px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  font-family: var(--font-display);
+}
+
+.channel-sub {
+  font-size: 17px;
+  font-weight: 600;
+  color: #a3a3a3;
+  letter-spacing: 1px;
+}
+
+/* Comic Center Showcase */
+.comic-intro-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 36px;
+  max-width: 1720px;
+  width: 100%;
+  z-index: 10;
+  margin-top: 35px;
+}
+
+/* Badge Strip */
+.badge-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.comic-badge-hot {
+  background: #000000;
+  color: #ffffff;
+  border: 3px solid #ffffff;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 24px;
+  padding: 12px 30px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 0% 100%);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow: 6px 6px 0px #ffffff;
+}
+
+.comic-chapter-badge.prominent {
+  background: #ffffff;
+  border: 4px solid #ffffff;
+  color: #000000;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 38px;
+  padding: 10px 48px;
+  border-radius: 8px;
+  letter-spacing: 2px;
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.5), 8px 8px 0px #ffffff;
+  text-transform: uppercase;
+}
+
+/* Comic Main Title (Big, B&W Manga Drop Shadow, Single Line Auto-Fit) */
+.comic-title-box {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1720px;
+}
+
+.comic-main-title.prominent-title {
+  font-family: var(--font-display);
+  font-size: 140px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: #ffffff;
+  white-space: nowrap;
+  display: inline-block;
+  text-align: center;
+  max-width: 100%;
+  text-shadow: 
+    6px 6px 0px #000000,
+    -4px -4px 0px #000000,
+    4px -4px 0px #000000,
+    -4px 4px 0px #000000,
+    0 15px 35px rgba(0, 0, 0, 0.95);
+  transform: skewX(-2deg);
+  margin-bottom: 6px;
+}
+
+.comic-subtitle {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: #cccccc;
+  letter-spacing: 4px;
+  margin-top: 8px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0px #000000;
+}
+
+/* Synopsis Box (Wide & Centered Manga Box) */
+.synopsis-box-wide {
+  background: rgba(14, 14, 14, 0.95);
+  border: 3px solid #ffffff;
+  border-left: 12px solid #ffffff;
+  padding: 34px 56px;
+  border-radius: 10px;
+  backdrop-filter: blur(16px);
+  box-shadow: 10px 10px 0px rgba(255, 255, 255, 0.35), 0 25px 60px rgba(0, 0, 0, 0.9);
+  max-width: 1680px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.synopsis-label {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #ffffff;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.synopsis-box-wide .synopsis-text {
+  font-size: 27px;
+  line-height: 1.7;
+  color: #f0f0f0;
+  font-weight: 400;
+}
+
+/* =======================================================
+   SCENE 2: COMMENTS LIST (B&W MANGA SPEECH CARDS)
+   ======================================================= */
+#scene-2 {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 44px 80px;
+  gap: 18px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.scene-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.scene-tag {
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 900;
+  padding: 3px 18px;
+  border-radius: 4px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.scene-main-title {
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 4px 4px 0px #000000, 0 10px 25px rgba(0, 0, 0, 0.9);
+}
+
+.comments-grid {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  max-width: 1680px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.comment-card {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 26px;
+  align-items: center;
+  background: #0f0f0f;
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  padding: 16px 36px;
+  backdrop-filter: blur(16px);
+  box-shadow: 8px 8px 0px rgba(255, 255, 255, 0.3), 0 16px 35px rgba(0, 0, 0, 0.7);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.comment-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: #ffffff;
+}
+
+/* Pure CSS First-Letter Avatar for Reader Comments */
+.comment-user-avatar-css {
+  width: 68px;
+  height: 68px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 3px #000000, 0 0 20px rgba(255, 255, 255, 0.25);
+  text-transform: uppercase;
+}
+
+.comment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.comment-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comment-username {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-display);
+}
+
+.comment-time {
+  font-size: 15px;
+  color: #888888;
+  font-weight: 600;
+}
+
+.comment-badge-fan {
+  background: #ffffff;
+  color: #000000;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  font-family: var(--font-display);
+}
+
+.comment-body-text {
+  font-size: 20px;
+  line-height: 1.45;
+  color: #f0f0f0;
+  word-break: break-word;
+}
+
+.comment-likes-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #181818;
+  border: 2px solid #ffffff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  gap: 3px;
+  min-width: 120px;
+}
+
+.like-label {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.like-count {
+  font-size: 26px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+/* =======================================================
+   SCENE 3: DONATE & QR CODE (MONOCHROME)
+   ======================================================= */
+#scene-3 {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
+.donate-container {
+  display: grid;
+  grid-template-columns: 480px 1fr;
+  gap: 60px;
+  max-width: 1450px;
+  width: 100%;
+  align-items: center;
+}
+
+/* QR Card */
+.qr-frame-box {
+  background: #0f0f0f;
+  border: 3px solid #ffffff;
+  border-radius: 18px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  backdrop-filter: blur(20px);
+  box-shadow: 10px 10px 0px #ffffff, 0 20px 50px rgba(0, 0, 0, 0.85);
+  position: relative;
+}
+
+.qr-image-wrapper {
+  position: relative;
+  width: 360px;
+  height: 360px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 3px solid #000000;
+}
+
+.qr-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: contrast(120%) grayscale(100%);
+}
+
+.qr-label-strip {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* Bank Details Column */
+.donate-details {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  width: 100%;
+}
+
+.banking-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+
+.bank-detail-card {
+  background: #0f0f0f;
+  border: 3px solid #ffffff;
+  border-radius: 18px;
+  padding: 34px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(14px);
+  box-shadow: 8px 8px 0px #ffffff, 0 15px 35px rgba(0, 0, 0, 0.7);
+}
+
+.bank-label {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #000000;
+  background: #ffffff;
+  padding: 4px 14px;
+  border-radius: 6px;
+  display: inline-block;
+  width: fit-content;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.bank-value {
+  font-size: 38px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1.5px;
+  line-height: 1.2;
+}
+
+.bank-subvalue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #aaaaaa;
+}
+
+.thankyou-badge {
+  background: #111111;
+  border: 3px solid #ffffff;
+  padding: 18px 28px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 6px 6px 0px #ffffff;
+}
+
+.thankyou-text {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  font-family: var(--font-display);
+}
+
+/* =======================================================
+   SCENE 4: NOTICE & DISCLAIMER (MONOCHROME)
+   ======================================================= */
+#scene-4 {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 48px;
+}
+
+.notice-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+  max-width: 1680px;
+  width: 100%;
+}
+
+.notice-card {
+  background: #0f0f0f;
+  border: 3px solid #ffffff;
+  border-radius: 16px;
+  padding: 46px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  backdrop-filter: blur(16px);
+  box-shadow: 8px 8px 0px #ffffff, 0 20px 50px rgba(0, 0, 0, 0.75);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.notice-badge {
+  background: #ffffff;
+  color: #000000;
+  font-size: 16px;
+  font-weight: 900;
+  padding: 6px 18px;
+  border-radius: 4px;
+  letter-spacing: 1.5px;
+  width: fit-content;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.notice-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.notice-desc {
+  font-size: 22px;
+  line-height: 1.7;
+  color: #d1d5db;
+}
+
+/* =======================================================
+   STUDIO CONTROLS & TIMELINE DOCK
+   ======================================================= */
+.studio-timeline {
+  height: 80px;
+  background: #0a0a0a;
+  border-top: 1px solid #222222;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 20px;
+  z-index: 100;
+}
+
+.timeline-playback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-ctrl {
+  background: #141414;
+  border: 1px solid #333333;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.btn-ctrl:hover {
+  background: #282828;
+  border-color: #ffffff;
+}
+
+.timeline-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+}
+
+.timeline-timecode {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.timeline-framecount {
+  font-size: 11px;
+  color: #888888;
+}
+
+.timeline-track-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.timeline-scene-markers {
+  display: flex;
+  width: 100%;
+  height: 16px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #181818;
+}
+
+.scene-marker {
+  height: 100%;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  border-right: 1px solid #000000;
+  transition: opacity 0.2s ease;
+  background: #242424;
+}
+
+.scene-marker:nth-child(even) { background: #333333; }
+
+.timeline-slider {
+  width: 100%;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  background: #222222;
+  outline: none;
+  cursor: pointer;
+}
+
+.timeline-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+
+/* =======================================================
+   CONFIG EDITOR DRAWER / SIDEBAR
+   ======================================================= */
+.editor-drawer {
+  position: fixed;
+  top: 52px;
+  right: -520px;
+  width: 500px;
+  bottom: 80px;
+  background: #0d0d0d;
+  border-left: 1px solid #262626;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.9);
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-drawer.open {
+  right: 0;
+}
+
+.drawer-header {
+  padding: 18px 24px;
+  background: #141414;
+  border-bottom: 1px solid #262626;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-family: var(--font-display);
+}
+
+.btn-close-drawer {
+  background: none;
+  border: none;
+  color: #888888;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888888;
+  letter-spacing: 0.5px;
+}
+
+.form-input, .form-textarea {
+  background: #181818;
+  border: 1px solid #333333;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus, .form-textarea:focus {
+  border-color: #ffffff;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.section-toggle-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #141414;
+  border-radius: 10px;
+  border: 1px solid #262626;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #2b2b2b;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #ffffff;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+  background-color: #000000;
+}

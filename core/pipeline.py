@@ -60,6 +60,17 @@ class Pipeline:
             )
 
         video_proc = VideoProcessor(self.work_dir, logger)
+
+        # --- Buoc 2.5: Render video gioi thieu truyen bang render.py (neu duoc bat) ---
+        comic_video_path = None
+        comic_json = cfg.resolved_comic_json()
+        if cfg.comic_info_enable and comic_json and os.path.exists(comic_json):
+            logger.info("Dang tao video gioi thieu truyen tu file json: %s ...", comic_json)
+            comic_video_path = video_proc.render_comic_video(
+                config_json=comic_json,
+                mode=cfg.comic_render_mode,
+            )
+
         uploaded_video_ids: List[str] = []
         final_paths: List[str] = []
 
@@ -72,11 +83,15 @@ class Pipeline:
             # --- Buoc 3: cat audio group + ghep video ---
             segment_audio = audio_proc.extract_segment(master_audio, g.start, g.duration, g.index_in_run)
             group_video = video_proc.build_group_video(
-                cfg.video_file,
-                segment_audio,
-                cfg.info_video,
-                g.index_in_run,
+                video_file=cfg.video_file,
+                audio_segment=segment_audio,
+                idx=g.index_in_run,
                 duration=g.duration,
+                intro_video=cfg.resolved_intro_video(),
+                comic_video=comic_video_path,
+                outro_video=cfg.resolved_outro_video(),
+                bg_music=cfg.background_music,
+                bg_volume=cfg.bg_music_volume,
             )
 
             final_dest = os.path.join(cfg.output_dir, f"{cfg.name}_tap_{current_index}.mp4")
@@ -117,6 +132,8 @@ class Pipeline:
         # --- don dep chung ---
         if not cfg.keep_master_audio:
             safe_remove(master_audio, logger)
+        if comic_video_path:
+            safe_remove(comic_video_path, logger)
 
         try:
             if os.path.isdir(self.work_dir) and not os.listdir(self.work_dir):

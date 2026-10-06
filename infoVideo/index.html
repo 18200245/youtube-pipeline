@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remotion Manga Studio 16:9 - Giới Thiệu Truyện & Render Video</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="app">
+    <!-- Studio Header Bar -->
+    <header class="studio-header">
+      <div class="studio-title">
+        <span class="studio-badge">REMOTION 16:9</span>
+        <span>MANGA INTRO STUDIO</span>
+      </div>
+      <div class="studio-actions">
+        <button id="btn-export-browser" class="btn-studio btn-primary">
+          <span>Xuất WebM (Trình Duyệt)</span>
+        </button>
+        <button id="btn-download-config" class="btn-studio">
+          <span>Lưu config.json</span>
+        </button>
+        <button id="btn-toggle-editor" class="btn-studio">
+          <span>Chỉnh Sửa Thông Số</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Studio Viewport Area -->
+    <main class="studio-viewport" id="viewport">
+      <!-- 1920x1080 Stage Container -->
+      <div id="stage-container">
+        <div class="remotion-root" id="remotion-root">
+          <!-- Background FX Layers -->
+          <div class="bg-layer manga-speedlines"></div>
+          <div class="bg-layer manga-screentone"></div>
+          <div class="bg-layer manga-vignette"></div>
+
+          <!-- Comic Ink Frame Accents -->
+          <div class="comic-frame-border"></div>
+          <div class="comic-corner top-left"></div>
+          <div class="comic-corner top-right"></div>
+          <div class="comic-corner bottom-left"></div>
+          <div class="comic-corner bottom-right"></div>
+
+          <!-- ================= SCENE 1 ================= -->
+          <section class="scene-wrapper active" id="scene-1">
+            <!-- Channel Badge Box (Top-Left Corner - Manga Style) -->
+            <div class="manga-channel-badge-box channel-pill-topleft" id="s1-channel-pill">
+              <div class="channel-avatar-css" id="s1-channel-avatar-css">M</div>
+              <div class="channel-info-text">
+                <div class="channel-name" id="s1-channel-name">MANGA STUDIO PRO</div>
+                <div class="channel-sub" id="s1-channel-handle">@manga_studio_official</div>
+              </div>
+            </div>
+
+            <div class="comic-intro-center">
+              <!-- Prominent Episode & Hot Badge Strip -->
+              <div class="badge-strip" id="s1-badge-strip">
+                <div class="comic-badge-hot" id="s1-comic-badge">MANGA BOM TẤN 2026</div>
+                <div class="comic-chapter-badge prominent" id="s1-comic-chapter">TẬP 45 - ĐẠI CHIẾN MA VỰC</div>
+              </div>
+
+              <!-- Super Prominent Comic Title -->
+              <div class="comic-title-box" id="s1-title-box">
+                <h1 class="comic-main-title prominent-title" id="s1-comic-title">HUYẾT MA TÁI THẾ</h1>
+                <div class="comic-subtitle" id="s1-comic-subtitle">Blood of the Abyss / Ác Ma Trỗi Dậy</div>
+              </div>
+
+              <!-- Synopsis Card -->
+              <div class="synopsis-box synopsis-box-wide" id="s1-synopsis-box">
+                <div class="synopsis-label">
+                  <span>Tóm Tắt Cốt Truyện</span>
+                </div>
+                <p class="synopsis-text" id="s1-comic-synopsis">
+                  Sau một ngàn năm bị phong ấn dưới vực sâu U Minh, Huyết Ma Vương Kenjiro tỉnh giấc với sức mạnh bóng
+                  tối vô song. Đối mặt với sự phản bội của tam đại gia tộc hoàng gia, hắn đơn thương độc mã tiến về
+                  vương đô để đoạt lại những gì đã mất...
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================= SCENE 2 ================= -->
+          <section class="scene-wrapper" id="scene-2">
+            <div class="scene-header">
+              <span class="scene-tag" id="s2-tag">TOP BÌNH LUẬN</span>
+              <h2 class="scene-main-title" id="s2-title">BÌNH LUẬN NỔI BẬT CỦA KHÁN GIẢ</h2>
+            </div>
+
+            <div class="comments-grid" id="s2-comments-container">
+              <!-- Dynamically populated comments -->
+            </div>
+          </section>
+
+          <!-- ================= SCENE 3 ================= -->
+          <section class="scene-wrapper" id="scene-3">
+            <div class="scene-header">
+              <span class="scene-tag" id="s3-tag">NẾU CÁC BẠN THÍCH VIDEO CÓ THỂ</span>
+              <h2 class="scene-main-title" id="s3-title">DONATE & COFFEE CHO ADMIN</h2>
+            </div>
+
+            <div class="donate-container">
+              <!-- QR Code Card -->
+              <div class="qr-frame-box" id="s3-qr-box">
+                <div class="qr-image-wrapper">
+                  <img src="assets/qr_code.png" alt="Mã QR Donate" class="qr-image" id="s3-qr-image">
+                </div>
+                <div class="qr-label-strip">QUÉT MÃ ĐỂ ỦNG HỘ NHANH</div>
+              </div>
+
+              <!-- Bank & Contact Info -->
+              <div class="donate-details" id="s3-details-box">
+                <div class="banking-info-grid">
+                  <div class="bank-detail-card">
+                    <span class="bank-label">NGÂN HÀNG</span>
+                    <span class="bank-value" id="s3-bank-name">MB BANK</span>
+                    <span class="bank-subvalue" id="s3-bank-branch">Chi nhánh Hà Nội</span>
+                  </div>
+
+                  <div class="bank-detail-card">
+                    <span class="bank-label">SỐ TÀI KHOẢN</span>
+                    <span class="bank-value" id="s3-bank-account">9999 8888 6666</span>
+                    <span class="bank-subvalue" id="s3-bank-holder">NGUYEN VAN ADMIN</span>
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+          </section>
+
+          <!-- ================= SCENE 4 ================= -->
+          <section class="scene-wrapper" id="scene-4">
+            <div class="scene-header">
+              <span class="scene-tag" id="s4-tag">THÔNG BÁO</span>
+              <h2 class="scene-main-title" id="s4-title">LƯU Ý QUAN TRỌNG TỪ KÊNH</h2>
+            </div>
+
+            <div class="notice-cards-grid" id="s4-cards-container">
+              <!-- Dynamically populated notice items -->
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Studio Timeline Dock -->
+    <footer class="studio-timeline">
+      <div class="timeline-playback">
+        <button id="btn-play-pause" class="btn-ctrl" title="Phát / Tạm dừng">
+          <span id="play-icon">▶</span>
+        </button>
+        <button id="btn-restart" class="btn-ctrl" title="Quay lại từ đầu">
+          <span>⏮</span>
+        </button>
+      </div>
+
+      <div class="timeline-info">
+        <div class="timeline-timecode" id="display-timecode">00:00.00 / 00:18.50</div>
+        <div class="timeline-framecount" id="display-framecount">Frame: 0 / 555 (30 FPS)</div>
+      </div>
+
+      <div class="timeline-track-container">
+        <!-- Scene Marker Segments -->
+        <div class="timeline-scene-markers" id="timeline-scene-markers"></div>
+        <input type="range" id="timeline-slider" class="timeline-slider" min="0" max="555" value="0" step="1">
+      </div>
+    </footer>
+
+    <!-- Config Editor Drawer -->
+    <aside class="editor-drawer" id="editor-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">TÙY CHỈNH THÔNG SỐ TEMPLATE</div>
+        <button class="btn-close-drawer" id="btn-close-drawer">✕</button>
+      </div>
+      <div class="drawer-body">
+        <!-- Scene 1 Settings -->
+        <div class="form-group">
+          <label class="form-label">TÊN KÊNH</label>
+          <input type="text" id="edit-channel-name" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">TÊN TRUYỆN</label>
+          <input type="text" id="edit-comic-title" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">TẬP TRUYỆN</label>
+          <input type="text" id="edit-comic-chapter" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">GIỚI THIỆU NGẮN (TÓM TẮT TRUYỆN)</label>
+          <textarea id="edit-comic-synopsis" class="form-textarea"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">THỜI LƯỢNG CẢNH 1 (GIÂY)</label>
+          <input type="number" id="edit-s1-duration" class="form-input" min="1" max="60" step="0.5">
+        </div>
+
+        <hr style="border-color: #1e293b;">
+
+        <!-- Scene 2 Toggle -->
+        <div class="section-toggle-box">
+          <span style="font-weight: 700; font-size: 14px;">BẬT CẢNH 2 (LIST BÌNH LUẬN)</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="edit-s2-enabled">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">THỜI LƯỢNG CẢNH 2 (GIÂY)</label>
+          <input type="number" id="edit-s2-duration" class="form-input" min="1" max="60" step="0.5">
+        </div>
+
+        <hr style="border-color: #1e293b;">
+
+        <!-- Scene 3 Settings -->
+        <div class="form-group">
+          <label class="form-label">NGÂN HÀNG (SCENE 3)</label>
+          <input type="text" id="edit-bank-name" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">SỐ TÀI KHOẢN</label>
+          <input type="text" id="edit-bank-account" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CHỦ TÀI KHOẢN</label>
+          <input type="text" id="edit-bank-holder" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">VÍ MOMO (SỐ ĐIỆN THOẠI)</label>
+          <input type="text" id="edit-momo-phone" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">THỜI LƯỢNG CẢNH 3 (GIÂY)</label>
+          <input type="number" id="edit-s3-duration" class="form-input" min="1" max="60" step="0.5">
+        </div>
+
+        <hr style="border-color: #1e293b;">
+
+        <!-- Scene 4 Toggle -->
+        <div class="section-toggle-box">
+          <span style="font-weight: 700; font-size: 14px;">BẬT CẢNH 4 (CHÚ Ý & LƯU Ý)</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="edit-s4-enabled">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">THỜI LƯỢNG CẢNH 4 (GIÂY)</label>
+          <input type="number" id="edit-s4-duration" class="form-input" min="1" max="60" step="0.5">
+        </div>
+
+        <button id="btn-apply-config" class="btn-studio btn-primary"
+          style="margin-top: 10px; justify-content: center; padding: 12px;">
+          <span>Áp Dụng Thay Đổi</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

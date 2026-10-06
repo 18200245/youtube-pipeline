@@ -35,7 +35,15 @@ def prompt_config() -> PipelineConfig:
 
     audios_dir = ask("Thu muc chua file audio (audios_dir)")
     video_file = ask("File video nen se lap lai (video_file)")
-    info_video = ask("File video gioi thieu (info_video, bo trong neu khong co)") or None
+
+    intro_enable = ask("Bat video intro? (y/n)", "y").lower().startswith("y")
+    intro_video = ask("File video intro (intro_video, bo trong neu khong co)") or None if intro_enable else None
+
+    comic_info_enable = ask("Tao video gioi thieu truyen tu file json (render.py)? (y/n)", "y").lower().startswith("y")
+    comic_json = ask("File JSON gioi thieu truyen (comic_json)", "infoVideo/config.json") if comic_info_enable else None
+
+    outro_enable = ask("Bat video outro? (y/n)", "y").lower().startswith("y")
+    outro_video = ask("File video outro (outro_video, bo trong neu khong co)") or None if outro_enable else None
 
     background_music = ask("File nhac nen (background_music, bo trong neu khong co)") or None
     bg_music_volume = ask("Am luong nhac nen (0.0-1.0 hoac vd -18dB)", "0.2") if background_music else "0.2"
@@ -60,7 +68,12 @@ def prompt_config() -> PipelineConfig:
         start_index=start_index,
         audios_dir=audios_dir,
         video_file=video_file,
-        info_video=info_video,
+        intro_video=intro_video,
+        intro_enable=intro_enable,
+        outro_video=outro_video,
+        outro_enable=outro_enable,
+        comic_json=comic_json,
+        comic_info_enable=comic_info_enable,
         background_music=background_music,
         bg_music_volume=bg_music_volume,
         output_dir=output_dir,
@@ -88,7 +101,21 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
     p.add_argument("--audios-dir")
     p.add_argument("--video-file")
-    p.add_argument("--info-video")
+
+    p.add_argument("--intro-video")
+    p.add_argument("--intro-enable", action="store_true", default=True, help="Bat video intro (mac dinh: True)")
+    p.add_argument("--no-intro-enable", action="store_false", dest="intro_enable", help="Tat video intro")
+
+    p.add_argument("--outro-video")
+    p.add_argument("--outro-enable", action="store_true", default=True, help="Bat video outro (mac dinh: True)")
+    p.add_argument("--no-outro-enable", action="store_false", dest="outro_enable", help="Tat video outro")
+
+    p.add_argument("--comic-json", help="Duong dan file JSON truyen render bang render.py")
+    p.add_argument("--comic-info-enable", action="store_true", default=True, help="Bat tao video gioi thieu truyen")
+    p.add_argument("--no-comic-info", action="store_false", dest="comic_info_enable", help="Tat video gioi thieu truyen")
+    p.add_argument("--comic-render-mode", choices=["frame", "realtime"], default="frame")
+
+    p.add_argument("--info-video", help="Alias tuong thich nguoc cho video gioi thieu/intro")
 
     p.add_argument("--background-music")
     p.add_argument("--bg-music-volume", default="0.2")
@@ -114,6 +141,13 @@ def config_from_args(args: argparse.Namespace) -> PipelineConfig:
         start_index=args.start_index,
         audios_dir=args.audios_dir,
         video_file=args.video_file,
+        intro_video=args.intro_video or args.info_video,
+        intro_enable=args.intro_enable,
+        outro_video=args.outro_video,
+        outro_enable=args.outro_enable,
+        comic_json=args.comic_json,
+        comic_info_enable=args.comic_info_enable,
+        comic_render_mode=getattr(args, "comic_render_mode", "frame"),
         info_video=args.info_video,
         background_music=args.background_music,
         bg_music_volume=args.bg_music_volume,

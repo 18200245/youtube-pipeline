@@ -77,6 +77,12 @@ def get_video_stream_params(path: str) -> dict:
     }
 
 
+def has_audio_stream(path: str) -> bool:
+    """Kiem tra xem file media co stream audio hay khong."""
+    info = ffprobe_json(path)
+    return any(s.get("codec_type") == "audio" for s in info.get("streams", []))
+
+
 def format_hms(seconds: float) -> str:
     seconds = int(round(seconds))
     h, rem = divmod(seconds, 3600)

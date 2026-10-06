@@ -36,7 +36,14 @@ class PipelineConfig:
     # --- Nguon du lieu ---
     audios_dir: str = ""               # thu muc chua cac file audio
     video_file: str = ""               # 1 file video nen de lap lai
-    info_video: Optional[str] = None   # video gioi thieu, noi vao dau moi video (tuy chon)
+    intro_video: Optional[str] = None  # file video intro
+    intro_enable: bool = True          # bat/tat video intro
+    outro_video: Optional[str] = None  # file video outro
+    outro_enable: bool = True          # bat/tat video outro
+    comic_json: Optional[str] = None   # duong dan file json gioi thieu truyen (render.py)
+    comic_info_enable: bool = True     # bat/tat video gioi thieu truyen tu render.py
+    comic_render_mode: str = "frame"   # che do render cua render.py: "frame" hoac "realtime"
+    info_video: Optional[str] = None   # alias cu tuong thich nguoc
 
     # --- Nhac nen ---
     background_music: Optional[str] = None
@@ -71,3 +78,31 @@ class PipelineConfig:
         if self.work_dir:
             return self.work_dir
         return os.path.join(self.output_dir, f"_tmp_{self.name}")
+
+    def resolved_intro_video(self) -> Optional[str]:
+        if not self.intro_enable:
+            return None
+        if self.intro_video:
+            return self.intro_video
+        if self.info_video and not self.info_video.strip().endswith(".json"):
+            return self.info_video
+        return None
+
+    def resolved_outro_video(self) -> Optional[str]:
+        if not self.outro_enable:
+            return None
+        return self.outro_video
+
+    def resolved_comic_json(self) -> Optional[str]:
+        if not self.comic_info_enable:
+            return None
+        if self.comic_json:
+            return self.comic_json
+        if self.info_video and self.info_video.strip().endswith(".json"):
+            return self.info_video
+        # Fallback to infoVideo/config.json if it exists
+        default_json = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "infoVideo", "config.json")
+        if os.path.exists(default_json):
+            return default_json
+        return None
+

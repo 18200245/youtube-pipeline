@@ -53,6 +53,13 @@ def run_pipeline(
     token_file: str = "token.json",
     noauth_local_webserver: bool = True,
     web_app_url: str = DEFAULT_WEB_APP_URL,
+    intro_enable: bool = True,
+    outro_enable: bool = True,
+    intro_video: Optional[str] = None,
+    outro_video: Optional[str] = None,
+    comic_json: Optional[str] = None,
+    comic_info_enable: bool = True,
+    comic_render_mode: str = "frame",
 ) -> List[str]:
     """Lay metadata tu Web App va thuc thi Pipeline."""
     print(f"Dang lay thong tin render tu Web App voi index={start_index}...")
@@ -71,7 +78,19 @@ def run_pipeline(
 
     bg_music_path = video_info.get("background_music") or None
     bg_music_volume = str(video_info.get("bg_music_volume", "0.2"))
-    info_video_path = video_info.get("info_video") or None
+
+    # Lay them cac thong tin intro/outro/comic neu chua truyen tu command line
+    if intro_video is None:
+        intro_video = video_info.get("intro_video") or video_info.get("info_video") or None
+    if outro_video is None:
+        outro_video = video_info.get("outro_video") or None
+    if comic_json is None:
+        comic_json = video_info.get("comic_json") or video_info.get("info_json") or None
+
+    if "intro_enable" in video_info and isinstance(video_info["intro_enable"], bool):
+        intro_enable = video_info["intro_enable"]
+    if "outro_enable" in video_info and isinstance(video_info["outro_enable"], bool):
+        outro_enable = video_info["outro_enable"]
 
     try:
         sample_title = title_pattern.format(index=start_index)
@@ -93,7 +112,13 @@ def run_pipeline(
         start_index=start_index,
         audios_dir=audios_dir,
         video_file=video_file,
-        info_video=info_video_path,
+        intro_video=intro_video,
+        intro_enable=intro_enable,
+        outro_video=outro_video,
+        outro_enable=outro_enable,
+        comic_json=comic_json,
+        comic_info_enable=comic_info_enable,
+        comic_render_mode=comic_render_mode,
         background_music=bg_music_path,
         bg_music_volume=bg_music_volume,
         output_dir=output_dir,
@@ -161,6 +186,68 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Giu lai file master audio sau khi hoan tat (mac dinh: False)",
     )
 
+    # Tham so intro / outro / video gioi thieu truyen
+    parser.add_argument(
+        "--intro-enable",
+        action="store_true",
+        default=True,
+        help="Bat video intro (mac dinh: True)",
+    )
+    parser.add_argument(
+        "--no-intro-enable",
+        action="store_false",
+        dest="intro_enable",
+        help="Tat video intro",
+    )
+    parser.add_argument(
+        "--outro-enable",
+        action="store_true",
+        default=True,
+        help="Bat video outro (mac dinh: True)",
+    )
+    parser.add_argument(
+        "--no-outro-enable",
+        action="store_false",
+        dest="outro_enable",
+        help="Tat video outro",
+    )
+    parser.add_argument(
+        "--intro-video",
+        type=str,
+        default=None,
+        help="Duong dan file video intro",
+    )
+    parser.add_argument(
+        "--outro-video",
+        type=str,
+        default=None,
+        help="Duong dan file video outro",
+    )
+    parser.add_argument(
+        "--comic-json",
+        type=str,
+        default=None,
+        help="Duong dan file JSON truyen de render video gioi thieu (dung render.py)",
+    )
+    parser.add_argument(
+        "--comic-info-enable",
+        action="store_true",
+        default=True,
+        help="Bat video gioi thieu truyen tu render.py (mac dinh: True)",
+    )
+    parser.add_argument(
+        "--no-comic-info",
+        action="store_false",
+        dest="comic_info_enable",
+        help="Tat video gioi thieu truyen tu render.py",
+    )
+    parser.add_argument(
+        "--comic-render-mode",
+        choices=["frame", "realtime"],
+        default="frame",
+        help="Che do render video gioi thieu truyen: frame hoac realtime (mac dinh: frame)",
+    )
+
     # Cac tham so tuy chon bo sung
     parser.add_argument(
         "--audios-dir",
@@ -213,6 +300,13 @@ def main() -> None:
             token_file=args.token_file,
             noauth_local_webserver=args.noauth_local_webserver,
             web_app_url=args.web_app_url,
+            intro_enable=args.intro_enable,
+            outro_enable=args.outro_enable,
+            intro_video=args.intro_video,
+            outro_video=args.outro_video,
+            comic_json=args.comic_json,
+            comic_info_enable=args.comic_info_enable,
+            comic_render_mode=args.comic_render_mode,
         )
     except Exception as exc:
         print(f"\n[LOI] {exc}", file=sys.stderr)
