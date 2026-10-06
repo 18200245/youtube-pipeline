@@ -33,7 +33,7 @@ import requests
 DEFAULT_OUTPUT_DIR = "/kaggle/working/output" if os.path.exists("/kaggle/working") else "./output"
 DEFAULT_WEB_APP_URL = (
     "https://script.google.com/macros/s/"
-    "AKfycbx6Lmkc-ul-ZosgAOBdCyQ5XIGOZBcfFqB-D-XowMAyDQIsdTuFIFIFjWKWtS4gMG_quw/exec"
+    "AKfycbx-7ydSHbQZcEDHECB9YAlZp6bdRI6JuSYXbR9ml7YrjVj7NHaZ7pr0tLA9_X8LfLjypQ/exec"
 )
 
 
