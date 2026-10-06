@@ -16,8 +16,10 @@ Cac tham so chinh:
 import argparse
 import sys
 from typing import List, Optional
+import os
 import requests
 
+DEFAULT_OUTPUT_DIR = "/kaggle/working/output" if os.path.exists("/kaggle/working") else "./output"
 DEFAULT_WEB_APP_URL = (
     "https://script.google.com/macros/s/"
     "AKfycbx6Lmkc-ul-ZosgAOBdCyQ5XIGOZBcfFqB-D-XowMAyDQIsdTuFIFIFjWKWtS4gMG_quw/exec"
@@ -45,7 +47,7 @@ def run_pipeline(
     start_index: int,
     name: str,
     project_id: str | int,
-    output_dir: str = "/tmp/output",
+    output_dir: Optional[str] = None,
     delete_final_video: bool = True,
     keep_audio: bool = False,
     audios_dir: Optional[str] = None,
@@ -64,6 +66,9 @@ def run_pipeline(
     """Lay metadata tu Web App va thuc thi Pipeline."""
     print(f"Dang lay thong tin render tu Web App voi index={start_index}...")
     video_info = fetch_rendered_info(web_app_url, start_index)
+
+    if not output_dir:
+        output_dir = DEFAULT_OUTPUT_DIR
 
     if not audios_dir:
         audios_dir = f"/kaggle/working/VoiceVNZeroTTS/projects/{project_id}/chapters"
@@ -164,8 +169,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="/tmp/output",
-        help="Thu muc luu video ket qua (mac dinh: /tmp/output)",
+        default=DEFAULT_OUTPUT_DIR,
+        help=f"Thu muc luu video ket qua (mac dinh: {DEFAULT_OUTPUT_DIR})",
     )
     parser.add_argument(
         "--delete-final-video",

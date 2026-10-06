@@ -61,6 +61,8 @@ Moi video xuat ra duoc ghep noi theo thu tu chuan:
 ```powershell
 pip install -r requirements.txt
 playwright install chromium
+# Tren Linux / Kaggle / Colab neu thieu thu vien he thong (libatk-1.0.so.0...):
+playwright install-deps chromium
 ```
 
 ---

@@ -134,12 +134,48 @@ def render_frame_mode(page, total_frames, fps, output_path, bitrate, ffmpeg_bin)
         err_msg = stderr_data.decode('utf-8', errors='ignore') if stderr_data else "Unknown error"
         raise RuntimeError(f"FFmpeg error (code {proc.returncode}): {err_msg}")
 
+def ensure_chromium_installed():
+    print("Dang tu dong cai dat Chromium browser va cac thu vien he thong cho Playwright...")
+    if sys.platform.startswith("linux"):
+        try:
+            subprocess.run([sys.executable, "-m", "playwright", "install-deps", "chromium"], check=False)
+        except Exception:
+            pass
+    try:
+        subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
+    except Exception as e:
+        print(f"Canh bao khi chay playwright install: {e}")
+
+
+def launch_chromium(p):
+    common_args = ["--no-sandbox", "--disable-setuid-sandbox", "--allow-file-access-from-files"]
+    try:
+        return p.chromium.launch(headless=True, args=common_args)
+    except Exception as exc:
+        err_str = str(exc)
+        # Thu dung Chrome co san tren may (dac biet tren Kaggle / Colab)
+        if any(k in err_str.lower() for k in ["shared libraries", "libatk", "no such file or directory", "executable"]):
+            try:
+                print("Dang thu khoi dong Google Chrome co san tren he thong (channel='chrome')...")
+                return p.chromium.launch(channel="chrome", headless=True, args=common_args)
+            except Exception:
+                pass
+
+        if any(k in err_str.lower() for k in ["playwright install", "executable", "shared libraries", "libatk"]):
+            ensure_chromium_installed()
+            try:
+                return p.chromium.launch(headless=True, args=common_args)
+            except Exception:
+                return p.chromium.launch(channel="chrome", headless=True, args=common_args)
+        raise exc
+
+
 def render_realtime_mode(p, html_url, config_json, total_duration, output_path):
     print(f"Chay che do realtime recording ({total_duration:.1f} giay)...")
     temp_dir = os.path.abspath("./.temp_render")
     os.makedirs(temp_dir, exist_ok=True)
 
-    browser = p.chromium.launch(headless=True, args=["--allow-file-access-from-files"])
+    browser = launch_chromium(p)
     context = browser.new_context(
         record_video_dir=temp_dir,
         record_video_size={"width": 1920, "height": 1080},
@@ -244,7 +280,7 @@ def render_manga_video(
             total_dur = d1 + d2 + d3 + d4
             render_realtime_mode(p, html_url, cfg, total_dur, output_path)
         else:
-            browser = p.chromium.launch(headless=True, args=["--allow-file-access-from-files"])
+            browser = launch_chromium(p)
             page = browser.new_page(viewport={"width": 1920, "height": 1080})
             page.goto(f"{html_url}?render=1")
             page.wait_for_function("() => window.remotionReady === true || window.remotionEngine !== undefined")

@@ -4,7 +4,7 @@ import sys
 from typing import List, Optional
 
 from .constants import VIDEO_ENCODER_MAP
-from .utils import get_video_stream_params, has_audio_stream, run_cmd, safe_remove
+from .utils import get_duration, get_video_stream_params, has_audio_stream, run_cmd, safe_remove
 
 
 class VideoProcessor:
@@ -84,10 +84,12 @@ class VideoProcessor:
         v_filter = f"[0:v]scale={target_params['width']}:{target_params['height']},fps={target_params['fps']}[v]"
         audio_sr = target_params["audio_sample_rate"]
         has_audio = has_audio_stream(clip_path)
+        clip_dur = max(0.1, get_duration(clip_path))
 
         self.logger.info(
-            "Chuan hoa video '%s' (has_audio=%s) khop voi video chinh...",
+            "Chuan hoa video '%s' (duration=%.2fs, has_audio=%s) khop voi video chinh...",
             os.path.basename(clip_path),
+            clip_dur,
             has_audio,
         )
 
@@ -101,14 +103,15 @@ class VideoProcessor:
                 "-map", "[v]", "-map", "[a]",
                 "-c:v", encoder, "-pix_fmt", target_params["pix_fmt"],
                 "-c:a", "aac", "-b:a", "192k",
+                "-t", f"{clip_dur:.3f}",
                 out_path,
             ]
         elif bg_music and os.path.exists(bg_music):
-            # Video khong co audio: long nhac nen neu co
+            # Video khong co audio: long nhac nen gioi han dung thoi luong video (tranh tran filter buffer)
             self.logger.info("Long nhac nen cho clip '%s'...", os.path.basename(clip_path))
             filter_complex = (
                 f"{v_filter};"
-                f"[1:a]volume={bg_volume},aformat=sample_rates={audio_sr}:channel_layouts=stereo[a]"
+                f"[1:a]atrim=0:{clip_dur:.3f},volume={bg_volume},aformat=sample_rates={audio_sr}:channel_layouts=stereo[a]"
             )
             cmd = [
                 "ffmpeg", "-y",
@@ -118,12 +121,15 @@ class VideoProcessor:
                 "-map", "[v]", "-map", "[a]",
                 "-c:v", encoder, "-pix_fmt", target_params["pix_fmt"],
                 "-c:a", "aac", "-b:a", "192k",
-                "-shortest",
+                "-t", f"{clip_dur:.3f}",
                 out_path,
             ]
         else:
-            # Video khong co audio va khong co nhac nen: tao luong silent audio
-            filter_complex = f"{v_filter};anullsrc=channel_layout=stereo:sample_rate={audio_sr}[a]"
+            # Video khong co audio va khong co nhac nen: tao luong silent audio co do dai xac dinh
+            filter_complex = (
+                f"{v_filter};"
+                f"anullsrc=channel_layout=stereo:sample_rate={audio_sr},atrim=0:{clip_dur:.3f}[a]"
+            )
             cmd = [
                 "ffmpeg", "-y",
                 "-i", clip_path,
@@ -131,7 +137,7 @@ class VideoProcessor:
                 "-map", "[v]", "-map", "[a]",
                 "-c:v", encoder, "-pix_fmt", target_params["pix_fmt"],
                 "-c:a", "aac", "-b:a", "192k",
-                "-shortest",
+                "-t", f"{clip_dur:.3f}",
                 out_path,
             ]
 
