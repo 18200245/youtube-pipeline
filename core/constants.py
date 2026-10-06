@@ -13,6 +13,9 @@ VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 MAX_GROUP_SECONDS = 12 * 3600  # 12 hours - hard limit per group
 
+AUDIO_SAMPLE_RATE = 24000
+AUDIO_CHANNELS = 1
+
 RETRIABLE_STATUS_CODES = (500, 502, 503, 504)
 RETRIABLE_EXCEPTIONS = (IOError, ConnectionError)
 MAX_UPLOAD_RETRIES = 10

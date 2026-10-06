@@ -1,6 +1,8 @@
 from .audio import AudioGroup, AudioProcessor, compute_groups, natural_sort_key
 from .config import PipelineConfig, SafeDict, extract_playlist_id
 from .constants import (
+    AUDIO_CHANNELS,
+    AUDIO_SAMPLE_RATE,
     MAX_GROUP_SECONDS,
     VALID_PRIVACY_STATUSES,
     VIDEO_ENCODER_MAP,
@@ -55,4 +57,6 @@ __all__ = [
     "VALID_PRIVACY_STATUSES",
     "MAX_GROUP_SECONDS",
     "VIDEO_ENCODER_MAP",
+    "AUDIO_SAMPLE_RATE",
+    "AUDIO_CHANNELS",
 ]

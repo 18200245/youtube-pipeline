@@ -72,8 +72,8 @@ def get_video_stream_params(path: str) -> dict:
         "codec_name": v.get("codec_name", "h264"),
         "pix_fmt": v.get("pix_fmt", "yuv420p"),
         "fps": fps,
-        "audio_sample_rate": int(a["sample_rate"]) if a and a.get("sample_rate") else 44100,
-        "audio_channels": int(a["channels"]) if a and a.get("channels") else 2,
+        "audio_sample_rate": int(a["sample_rate"]) if a and a.get("sample_rate") else 24000,
+        "audio_channels": int(a["channels"]) if a and a.get("channels") else 1,
     }
 
 

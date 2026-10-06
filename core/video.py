@@ -61,7 +61,8 @@ class VideoProcessor:
             "-i", audio_segment,
             "-map", "0:v:0", "-map", "1:a:0",
             "-c:v", "copy",
-            "-c:a", "aac", "-b:a", "192k",
+            "-c:a", "aac", "-b:a", "128k",
+            "-ar", "24000", "-ac", "1",
         ]
         if duration is not None:
             cmd.extend(["-t", f"{max(0.001, float(duration)):.3f}"])
@@ -78,40 +79,42 @@ class VideoProcessor:
         bg_volume: str = "0.2",
     ) -> str:
         """Encode lai clip video de khop 100% codec, do phan giai, fps, pix_fmt
-        va audio (AAC, samplerate, channels) voi video chinh (body), dam bao
+        va audio (AAC, 24000Hz, mono) voi video chinh (body), dam bao
         co the concat (-c copy) khong loi va khong bi mat tieng."""
         encoder = VIDEO_ENCODER_MAP.get(target_params["codec_name"], "libx264")
         v_filter = f"[0:v]scale={target_params['width']}:{target_params['height']},fps={target_params['fps']}[v]"
-        audio_sr = target_params["audio_sample_rate"]
+        audio_sr = target_params.get("audio_sample_rate") or 24000
+        audio_ch = target_params.get("audio_channels") or 1
         has_audio = has_audio_stream(clip_path)
         clip_dur = max(0.1, get_duration(clip_path))
 
         self.logger.info(
-            "Chuan hoa video '%s' (duration=%.2fs, has_audio=%s) khop voi video chinh...",
+            "Chuan hoa video '%s' (duration=%.2fs, has_audio=%s, 24000Hz mono) khop voi video chinh...",
             os.path.basename(clip_path),
             clip_dur,
             has_audio,
         )
 
         if has_audio:
-            # Video da co audio: giu tieng va chuyen sang AAC chuan hoa
-            filter_complex = f"{v_filter};[0:a]aformat=sample_rates={audio_sr}:channel_layouts=stereo[a]"
+            # Video da co audio: chuyen sang AAC 24000Hz mono
+            filter_complex = f"{v_filter};[0:a]aformat=sample_rates=24000:channel_layouts=mono[a]"
             cmd = [
                 "ffmpeg", "-y",
                 "-i", clip_path,
                 "-filter_complex", filter_complex,
                 "-map", "[v]", "-map", "[a]",
                 "-c:v", encoder, "-pix_fmt", target_params["pix_fmt"],
-                "-c:a", "aac", "-b:a", "192k",
+                "-c:a", "aac", "-b:a", "128k",
+                "-ar", "24000", "-ac", "1",
                 "-t", f"{clip_dur:.3f}",
                 out_path,
             ]
         elif bg_music and os.path.exists(bg_music):
-            # Video khong co audio: long nhac nen gioi han dung thoi luong video (tranh tran filter buffer)
-            self.logger.info("Long nhac nen cho clip '%s'...", os.path.basename(clip_path))
+            # Video khong co audio: long nhac nen 24000Hz mono gioi han dung thoi luong video
+            self.logger.info("Long nhac nen cho clip '%s' (24000Hz mono)...", os.path.basename(clip_path))
             filter_complex = (
                 f"{v_filter};"
-                f"[1:a]atrim=0:{clip_dur:.3f},volume={bg_volume},aformat=sample_rates={audio_sr}:channel_layouts=stereo[a]"
+                f"[1:a]atrim=0:{clip_dur:.3f},volume={bg_volume},aformat=sample_rates=24000:channel_layouts=mono[a]"
             )
             cmd = [
                 "ffmpeg", "-y",
@@ -120,15 +123,16 @@ class VideoProcessor:
                 "-filter_complex", filter_complex,
                 "-map", "[v]", "-map", "[a]",
                 "-c:v", encoder, "-pix_fmt", target_params["pix_fmt"],
-                "-c:a", "aac", "-b:a", "192k",
+                "-c:a", "aac", "-b:a", "128k",
+                "-ar", "24000", "-ac", "1",
                 "-t", f"{clip_dur:.3f}",
                 out_path,
             ]
         else:
-            # Video khong co audio va khong co nhac nen: tao luong silent audio co do dai xac dinh
+            # Video khong co audio va khong co nhac nen: tao luong silent audio 24000Hz mono
             filter_complex = (
                 f"{v_filter};"
-                f"anullsrc=channel_layout=stereo:sample_rate={audio_sr},atrim=0:{clip_dur:.3f}[a]"
+                f"anullsrc=channel_layout=mono:sample_rate=24000,atrim=0:{clip_dur:.3f}[a]"
             )
             cmd = [
                 "ffmpeg", "-y",
@@ -136,7 +140,8 @@ class VideoProcessor:
                 "-filter_complex", filter_complex,
                 "-map", "[v]", "-map", "[a]",
                 "-c:v", encoder, "-pix_fmt", target_params["pix_fmt"],
-                "-c:a", "aac", "-b:a", "192k",
+                "-c:a", "aac", "-b:a", "128k",
+                "-ar", "24000", "-ac", "1",
                 "-t", f"{clip_dur:.3f}",
                 out_path,
             ]

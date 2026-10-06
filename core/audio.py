@@ -82,14 +82,14 @@ class AudioProcessor:
 
     def normalize(self, audio_files: List[str]) -> List[str]:
         """Dua tat ca file audio ve cung 1 dinh dang (wav pcm_s16le, 24000Hz,
-        stereo) de co the noi (concat demuxer + copy) an toan."""
+        mono) de co the noi (concat demuxer + copy) an toan."""
         normalized = []
         for i, src in enumerate(audio_files):
             dst = os.path.join(self.work_dir, f"_norm_{i:04d}.wav")
             run_cmd(
                 [
                     "ffmpeg", "-y", "-i", src,
-                    "-ar", "24000", "-ac", "2", "-c:a", "pcm_s16le",
+                    "-ar", "24000", "-ac", "1", "-c:a", "pcm_s16le",
                     dst,
                 ],
                 self.logger,
@@ -117,7 +117,7 @@ class AudioProcessor:
             self.logger.info("Khong co nhac nen, bo qua buoc tron nhac.")
             return speech_audio
 
-        self.logger.info("Dang ghep nhac nen (volume=%s)...", bg_volume)
+        self.logger.info("Dang ghep nhac nen (volume=%s, 24000Hz mono)...", bg_volume)
         master = os.path.join(self.work_dir, "_master_audio.wav")
         run_cmd(
             [
@@ -125,8 +125,11 @@ class AudioProcessor:
                 "-i", speech_audio,
                 "-stream_loop", "-1", "-i", bg_music,
                 "-filter_complex",
-                f"[1:a]volume={bg_volume}[bg];[0:a][bg]amix=inputs=2:duration=first:dropout_transition=2:normalize=0",
+                f"[1:a]volume={bg_volume},aformat=sample_rates=24000:channel_layouts=mono[bg];"
+                f"[0:a][bg]amix=inputs=2:duration=first:dropout_transition=2:normalize=0,aformat=sample_rates=24000:channel_layouts=mono[out]",
+                "-map", "[out]",
                 "-c:a", "pcm_s16le",
+                "-ar", "24000", "-ac", "1",
                 master,
             ],
             self.logger,
