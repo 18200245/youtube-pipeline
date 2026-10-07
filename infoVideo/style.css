@@ -3,8 +3,8 @@
 /* Local Manga Custom Font (UTM-Azuki) */
 @font-face {
   font-family: 'UTM-Azuki';
-  src: url('fonts/UTM-Azuki.ttf') format('truetype'),
-       url('assets/fonts/UTM-Azuki.ttf') format('truetype');
+  src: url('assets/fonts/UTM-Azuki.ttf') format('truetype'),
+    url('assets/fonts/UTM-Azuki.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -32,7 +32,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   background: #000000;
@@ -189,21 +190,27 @@ body.render-mode #stage-container {
 .manga-speedlines {
   position: absolute;
   inset: -100px;
-  background: repeating-conic-gradient(
-    from 0deg,
-    rgba(255, 255, 255, 0.035) 0deg 2deg,
-    transparent 2deg 6deg,
-    rgba(255, 255, 255, 0.015) 6deg 8deg,
-    transparent 8deg 14deg
-  );
+  background: repeating-conic-gradient(from 0deg,
+      rgba(255, 255, 255, 0.035) 0deg 2deg,
+      transparent 2deg 6deg,
+      rgba(255, 255, 255, 0.015) 6deg 8deg,
+      transparent 8deg 14deg);
   opacity: 0.9;
   animation: speedlinesPulse 8s linear infinite;
 }
 
 @keyframes speedlinesPulse {
-  0% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.04) rotate(0.8deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  50% {
+    transform: scale(1.04) rotate(0.8deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 /* Halftone Screentone Pattern (Pure Manga Screentone) */
@@ -245,10 +252,34 @@ body.render-mode #stage-container {
   border: 4px solid #ffffff;
   z-index: 51;
 }
-.comic-corner.top-left { top: 22px; left: 22px; border-right: none; border-bottom: none; }
-.comic-corner.top-right { top: 22px; right: 22px; border-left: none; border-bottom: none; }
-.comic-corner.bottom-left { bottom: 22px; left: 22px; border-right: none; border-top: none; }
-.comic-corner.bottom-right { bottom: 22px; right: 22px; border-left: none; border-top: none; }
+
+.comic-corner.top-left {
+  top: 22px;
+  left: 22px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.comic-corner.top-right {
+  top: 22px;
+  right: 22px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.comic-corner.bottom-left {
+  bottom: 22px;
+  left: 22px;
+  border-right: none;
+  border-top: none;
+}
+
+.comic-corner.bottom-right {
+  bottom: 22px;
+  right: 22px;
+  border-left: none;
+  border-top: none;
+}
 
 /* Scene Container */
 .scene-wrapper {
@@ -409,7 +440,7 @@ body.render-mode #stage-container {
   display: inline-block;
   text-align: center;
   max-width: 100%;
-  text-shadow: 
+  text-shadow:
     6px 6px 0px #000000,
     -4px -4px 0px #000000,
     4px -4px 0px #000000,
@@ -923,7 +954,9 @@ body.render-mode #stage-container {
   background: #242424;
 }
 
-.scene-marker:nth-child(even) { background: #333333; }
+.scene-marker:nth-child(even) {
+  background: #333333;
+}
 
 .timeline-slider {
   width: 100%;
@@ -1013,7 +1046,8 @@ body.render-mode #stage-container {
   letter-spacing: 0.5px;
 }
 
-.form-input, .form-textarea {
+.form-input,
+.form-textarea {
   background: #181818;
   border: 1px solid #333333;
   color: #fff;
@@ -1025,7 +1059,8 @@ body.render-mode #stage-container {
   transition: border-color 0.2s ease;
 }
 
-.form-input:focus, .form-textarea:focus {
+.form-input:focus,
+.form-textarea:focus {
   border-color: #ffffff;
 }
 
@@ -1078,11 +1113,11 @@ body.render-mode #stage-container {
   border-radius: 50%;
 }
 
-input:checked + .toggle-slider {
+input:checked+.toggle-slider {
   background-color: #ffffff;
 }
 
-input:checked + .toggle-slider:before {
+input:checked+.toggle-slider:before {
   transform: translateX(20px);
   background-color: #000000;
 }

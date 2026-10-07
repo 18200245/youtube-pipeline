@@ -67,23 +67,23 @@
   "scene4": {
     "enabled": true,
     "duration": 4.0,
-    "title": "LƯU Ý QUAN TRỌNG",
+    "title": "LƯU Ý NHỎ",
     "subTitle": "NOTICE & DISCLAIMER TỪ KÊNH",
     "items": [
       {
-        "badge": "LỊCH RA TẬP",
-        "title": "Lịch Chiếu Cố Định",
-        "desc": "Tập mới lên sóng vào lúc 19:30 mỗi tối thứ 2, 4, 6 và Chủ Nhật. Đừng quên bật chuông thông báo!"
+        "badge": "THÔNG TIN",
+        "title": "Thông tin trong Video",
+        "desc": "Nội dung video và hình thu nhỏ có thể không xuất hiện trong nội dung thực tế."
       },
       {
-        "badge": "BẢN QUYỀN",
-        "title": "Tôn Trọng Tác Giả & Họa Sĩ",
-        "desc": "Video phục vụ mục đích giới thiệu truyện và phi thương mại. Mọi bản quyền hình ảnh thuộc về tác giả gốc."
+        "badge": "NỘI DUNG",
+        "title": "Nội dung video",
+        "desc": "Toàn bộ nội dung trong truyện là hư cấu, không liên quan đến thực tế hoặc bất cứ sự kiện ngoài đời nào."
       },
       {
         "badge": "TƯƠNG TÁC",
         "title": "Cộng Đồng Giao Lưu",
-        "desc": "Bấm Like, Share và Subscribe kênh để tham gia vào cộng đồng những người đam mê Manga cùng chúng mình nhé!"
+        "desc": "Bấm Like, Share và Subscribe để ủng hộ mình nha. Comment thời gian + chi tiết lỗi nếu các bạn gặp lỗi nhé!"
       }
     ]
   }

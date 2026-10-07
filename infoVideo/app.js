@@ -46,6 +46,7 @@ class RemotionEngine {
     this.isPlaying = false;
     this.animationTimer = null;
     this.scenes = []; // [{ id, enabled, duration, startFrame, endFrame }]
+    this.lastDiskConfigStr = null;
 
     this.init();
   }
@@ -62,12 +63,15 @@ class RemotionEngine {
       try {
         const res = await fetch(`config.json?t=${Date.now()}`, { cache: 'no-store' });
         if (!this.configLoadedExternally) {
-          this.config = await res.json();
+          const text = await res.text();
+          this.lastDiskConfigStr = text;
+          this.config = JSON.parse(text);
         }
       } catch (e) {
         if (!this.configLoadedExternally) {
           console.warn('Could not load config.json, using default template', e);
           this.config = this.getDefaultConfig();
+          this.lastDiskConfigStr = JSON.stringify(this.config);
         }
       }
     }
@@ -109,8 +113,11 @@ class RemotionEngine {
       try {
         const res = await fetch(`config.json?t=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) return;
-        const newCfg = await res.json();
-        if (JSON.stringify(newCfg) !== JSON.stringify(this.config)) {
+        const text = await res.text();
+        // Chỉ reload khi nội dung file config.json trên ổ đĩa thực sự thay đổi từ bên ngoài (ví dụ sửa qua VSCode/Notepad)
+        if (this.lastDiskConfigStr !== null && text !== this.lastDiskConfigStr) {
+          this.lastDiskConfigStr = text;
+          const newCfg = JSON.parse(text);
           this.loadConfig(newCfg);
         }
       } catch (e) { }
@@ -423,7 +430,9 @@ class RemotionEngine {
 
     setVal('edit-channel-name', ch.name);
     setVal('edit-comic-title', cm.title);
+    setVal('edit-comic-subtitle', cm.subTitle);
     setVal('edit-comic-chapter', cm.chapter);
+    setVal('edit-comic-badge', cm.badge);
     setVal('edit-comic-synopsis', cm.synopsis);
     setVal('edit-s1-duration', s1.duration || 5.0);
 
@@ -468,8 +477,14 @@ class RemotionEngine {
     const elCmTitle = document.getElementById('edit-comic-title');
     if (elCmTitle) this.config.scene1.comic.title = elCmTitle.value;
 
+    const elCmSub = document.getElementById('edit-comic-subtitle');
+    if (elCmSub) this.config.scene1.comic.subTitle = elCmSub.value;
+
     const elCmChap = document.getElementById('edit-comic-chapter');
     if (elCmChap) this.config.scene1.comic.chapter = elCmChap.value;
+
+    const elCmBadge = document.getElementById('edit-comic-badge');
+    if (elCmBadge) this.config.scene1.comic.badge = elCmBadge.value;
 
     const elCmSyn = document.getElementById('edit-comic-synopsis');
     if (elCmSyn) this.config.scene1.comic.synopsis = elCmSyn.value;
@@ -915,6 +930,7 @@ class RemotionEngine {
     this.config = cfg;
     this.fps = (this.config.general && this.config.general.fps) || 30;
     this.applyConfigToDOM();
+    this.populateDrawerInputs();
     this.rebuildTimeline();
     this.seekToFrame(0);
     window.remotionReady = true;
