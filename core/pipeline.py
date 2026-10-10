@@ -117,6 +117,8 @@ class Pipeline:
                 outro_video=cfg.resolved_outro_video(),
                 bg_music=cfg.background_music,
                 bg_volume=cfg.bg_music_volume,
+                rerender=cfg.rerender,
+                rerender_preset=cfg.rerender_preset,
             )
 
             if temp_comic_to_clean:

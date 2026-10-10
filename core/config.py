@@ -44,6 +44,8 @@ class PipelineConfig:
     comic_info_enable: bool = True     # bat/tat video gioi thieu truyen tu render.py
     comic_render_mode: str = "frame"   # che do render cua render.py: "frame" hoac "realtime"
     info_video: Optional[str] = None   # alias cu tuong thich nguoc
+    rerender: bool = False             # True = encode lai 1 lan khi ghep (bo qua build_body/copy)
+    rerender_preset: str = "fastest"   # fastest | balanced | quality
 
     # --- Nhac nen ---
     background_music: Optional[str] = None

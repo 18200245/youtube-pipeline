@@ -1,10 +1,56 @@
 import logging
 import os
+import subprocess
 import sys
 from typing import List, Optional
 
 from .constants import VIDEO_ENCODER_MAP
 from .utils import get_duration, get_video_stream_params, has_audio_stream, run_cmd, safe_remove
+
+# Preset rerender: (nvenc_args, x264_args)
+RERENDER_PRESETS = {
+    "fastest": (
+        ["-preset", "p1", "-tune", "ll", "-rc", "vbr", "-cq", "28", "-b:v", "0", "-bf", "0", "-g", "60"],
+        ["-preset", "ultrafast", "-tune", "zerolatency", "-crf", "28", "-g", "60", "-threads", "0"],
+    ),
+    "balanced": (
+        ["-preset", "p4", "-rc", "vbr", "-cq", "23", "-b:v", "0"],
+        ["-preset", "veryfast", "-crf", "23", "-threads", "0"],
+    ),
+    "quality": (
+        ["-preset", "p7", "-rc", "vbr", "-cq", "19", "-b:v", "0"],
+        ["-preset", "medium", "-crf", "20", "-threads", "0"],
+    ),
+}
+
+_NVENC_AVAILABLE: Optional[bool] = None
+
+
+def nvenc_available() -> bool:
+    """Kiem tra h264_nvenc co dung duoc khong (cache ket qua)."""
+    global _NVENC_AVAILABLE
+    if _NVENC_AVAILABLE is not None:
+        return _NVENC_AVAILABLE
+    try:
+        encoders = subprocess.run(
+            ["ffmpeg", "-hide_banner", "-encoders"],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+        ).stdout
+        if "h264_nvenc" not in encoders:
+            _NVENC_AVAILABLE = False
+        else:
+            test = subprocess.run(
+                [
+                    "ffmpeg", "-hide_banner", "-v", "error",
+                    "-f", "lavfi", "-i", "color=c=black:s=256x256:d=0.1",
+                    "-c:v", "h264_nvenc", "-f", "null", "-",
+                ],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+            )
+            _NVENC_AVAILABLE = test.returncode == 0
+    except Exception:
+        _NVENC_AVAILABLE = False
+    return _NVENC_AVAILABLE
 
 
 class VideoProcessor:
@@ -182,6 +228,100 @@ class VideoProcessor:
         out_path = os.path.join(self.work_dir, f"_final_{idx:03d}.mp4")
         return self.concat_videos([intro_path, body_path], out_path)
 
+    def build_group_video_rerender(
+        self,
+        video_file: str,
+        audio_segment: str,
+        idx: int,
+        duration: Optional[float],
+        clips_before: List[str],
+        clips_after: List[str],
+        bg_music: Optional[str] = None,
+        bg_volume: str = "0.2",
+        preset: str = "fastest",
+    ) -> str:
+        """Rerender 1 lan duy nhat: [clips_before] + body(video_file lap + audio_segment)
+        + [clips_after] bang concat filter, khong tao file body trung gian."""
+        params = get_video_stream_params(video_file)
+        W, H, fps = params["width"], params["height"], params["fps"]
+        body_dur = float(duration) if duration is not None else get_duration(audio_segment)
+        body_dur = max(0.001, body_dur)
+
+        nvenc_args, x264_args = RERENDER_PRESETS.get(preset, RERENDER_PRESETS["fastest"])
+        if nvenc_available():
+            enc_args = ["-c:v", "h264_nvenc"] + nvenc_args
+            self.logger.info("Rerender dung h264_nvenc (preset=%s)", preset)
+        else:
+            enc_args = ["-c:v", "libx264"] + x264_args
+            self.logger.info("Rerender dung libx264 (preset=%s)", preset)
+
+        inputs: List[str] = []
+        n_inputs = 0
+        filters: List[str] = []
+        segs: List[str] = []
+        seg_i = 0
+        vnorm = f"scale={W}:{H},fps={fps},setsar=1,format=yuv420p"
+        anorm = "aformat=sample_rates=24000:channel_layouts=mono"
+
+        def add_clip(path: str) -> None:
+            nonlocal n_inputs, seg_i
+            vi = n_inputs
+            inputs.extend(["-i", path])
+            n_inputs += 1
+            dur = max(0.1, get_duration(path))
+            filters.append(f"[{vi}:v]{vnorm},trim=duration={dur:.3f},setpts=PTS-STARTPTS[v{seg_i}]")
+            if has_audio_stream(path):
+                filters.append(f"[{vi}:a]{anorm},asetpts=PTS-STARTPTS[a{seg_i}]")
+            elif bg_music and os.path.exists(bg_music):
+                bi = n_inputs
+                inputs.extend(["-stream_loop", "-1", "-i", bg_music])
+                n_inputs += 1
+                filters.append(
+                    f"[{bi}:a]atrim=0:{dur:.3f},volume={bg_volume},{anorm},asetpts=PTS-STARTPTS[a{seg_i}]"
+                )
+            else:
+                filters.append(
+                    f"anullsrc=channel_layout=mono:sample_rate=24000,atrim=0:{dur:.3f},asetpts=PTS-STARTPTS[a{seg_i}]"
+                )
+            segs.append(f"[v{seg_i}][a{seg_i}]")
+            seg_i += 1
+
+        for p in clips_before:
+            add_clip(p)
+
+        # Body: video lap vo han (cat bang trim) + audio segment
+        bv = n_inputs
+        inputs.extend(["-stream_loop", "-1", "-i", video_file])
+        n_inputs += 1
+        ba = n_inputs
+        inputs.extend(["-i", audio_segment])
+        n_inputs += 1
+        filters.append(f"[{bv}:v]{vnorm},trim=duration={body_dur:.3f},setpts=PTS-STARTPTS[v{seg_i}]")
+        filters.append(f"[{ba}:a]{anorm},atrim=duration={body_dur:.3f},asetpts=PTS-STARTPTS[a{seg_i}]")
+        segs.append(f"[v{seg_i}][a{seg_i}]")
+        seg_i += 1
+
+        for p in clips_after:
+            add_clip(p)
+
+        filters.append(f"{''.join(segs)}concat=n={len(segs)}:v=1:a=1[v][a]")
+
+        out_path = os.path.join(self.work_dir, f"_final_{idx:03d}.mp4")
+        cpu = str(os.cpu_count() or 1)
+        cmd = [
+            "ffmpeg", "-y", "-filter_complex_threads", cpu, *inputs,
+            "-filter_complex", ";".join(filters),
+            "-map", "[v]", "-map", "[a]",
+            *enc_args,
+            "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "128k", "-ar", "24000", "-ac", "1",
+            "-movflags", "+faststart",
+            out_path,
+        ]
+        self.logger.info("Rerender video group %d (%d doan)...", idx, len(segs))
+        run_cmd(cmd, self.logger)
+        return out_path
+
     def build_group_video(
         self,
         video_file: str,
@@ -194,6 +334,8 @@ class VideoProcessor:
         bg_music: Optional[str] = None,
         bg_volume: str = "0.2",
         info_video: Optional[str] = None,
+        rerender: bool = False,
+        rerender_preset: str = "fastest",
     ) -> str:
         """Xay dung video hoan chinh cho mot group bao gom:
         [Intro] -> [Video gioi thieu truyen] -> [Body TTS] -> [Outro]."""
@@ -208,6 +350,16 @@ class VideoProcessor:
 
         if not intro_video and info_video:
             intro_video = info_video
+
+        if rerender:
+            before = [
+                p for p in (intro_video, comic_video) if p and os.path.exists(p)
+            ]
+            after = [outro_video] if outro_video and os.path.exists(outro_video) else []
+            return self.build_group_video_rerender(
+                video_file, audio_segment, idx, duration,
+                before, after, bg_music, bg_volume, rerender_preset,
+            )
 
         body_path = self.build_body(video_file, audio_segment, idx, duration=duration)
 

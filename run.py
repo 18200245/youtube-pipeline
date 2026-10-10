@@ -20,6 +20,8 @@ Cac tham so chinh:
   --delete-final-video / --no-delete-final-video: Xoa video sau khi upload (mac dinh: True)
   --keep-audio: Giu lai master audio sau khi xu ly (mac dinh: False)
   --keep-comic-json: Giu lai file comic json tam sau khi chay (mac dinh: xoa)
+  --rerender: Encode lai 1 lan khi ghep video (bo qua build body/concat copy)
+  --rerender-preset: fastest | balanced | quality (mac dinh: fastest)
 """
 
 import argparse
@@ -108,6 +110,8 @@ def run_pipeline(
     comic_info_enable: bool = True,
     comic_render_mode: str = "frame",
     keep_comic_json: bool = False,
+    rerender: bool = False,
+    rerender_preset: str = "fastest",
 ) -> List[str]:
     """Lay metadata tu Web App va thuc thi Pipeline."""
     print(f"Dang lay thong tin render tu Web App voi index={start_index}...")
@@ -192,6 +196,8 @@ def run_pipeline(
         noauth_local_webserver=noauth_local_webserver,
         delete_final_video_after_upload=delete_final_video,
         keep_master_audio=keep_audio,
+        rerender=rerender,
+        rerender_preset=rerender_preset,
     )
 
     try:
@@ -296,6 +302,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default="frame",
         help="Che do render video gioi thieu truyen: frame hoac realtime (mac dinh: frame)",
     )
+    parser.add_argument(
+        "--rerender",
+        action="store_true",
+        default=False,
+        help="Encode lai 1 lan khi ghep video thay vi concat copy (mac dinh: tat)",
+    )
+    parser.add_argument(
+        "--rerender-preset",
+        choices=["fastest", "balanced", "quality"],
+        default="fastest",
+        help="Preset encode khi dung --rerender (mac dinh: fastest)",
+    )
 
     parser.add_argument(
         "--audios-dir", type=str, default=None, help="Ghi de thu muc audio (mac dinh dung project_id)"
@@ -350,6 +368,8 @@ def main() -> None:
             comic_info_enable=args.comic_info_enable,
             comic_render_mode=args.comic_render_mode,
             keep_comic_json=args.keep_comic_json,
+            rerender=args.rerender,
+            rerender_preset=args.rerender_preset,
         )
     except Exception as exc:
         print(f"\n[LOI] {exc}", file=sys.stderr)
