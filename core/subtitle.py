@@ -166,6 +166,7 @@ def generate_ass_content(
 ScriptType: v4.00+
 PlayResX: {width}
 PlayResY: {height}
+WrapStyle: 2
 ScaledBorderAndShadow: yes
 
 [V4+ Styles]
@@ -259,6 +260,11 @@ class SubtitleProcessor:
 
         # Sap xep theo thoi gian bat dau
         all_entries.sort(key=lambda e: e.start)
+
+        # Khang va cham (anti-collision): triet tieu overlap thoi gian lam sub nhay vi tri
+        for i in range(len(all_entries) - 1):
+            if all_entries[i].end > all_entries[i + 1].start:
+                all_entries[i].end = all_entries[i + 1].start
         return all_entries
 
     def slice_group_subtitles(
@@ -299,6 +305,12 @@ class SubtitleProcessor:
         if not group_entries:
             self.logger.info("Group %d khong co phu de nao trong khoang thoi gian nay.", idx)
             return None
+
+        group_entries.sort(key=lambda e: e.start)
+        # Khang va cham (anti-collision): triet tieu overlap thoi gian lam sub nhay vi tri
+        for i in range(len(group_entries) - 1):
+            if group_entries[i].end > group_entries[i + 1].start:
+                group_entries[i].end = group_entries[i + 1].start
 
         out_path = os.path.join(self.work_dir, f"_sub_group_{idx:03d}.ass")
         ass_content = generate_ass_content(
