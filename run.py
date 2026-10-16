@@ -112,6 +112,11 @@ def run_pipeline(
     keep_comic_json: bool = False,
     rerender: bool = False,
     rerender_preset: str = "fastest",
+    subtitle: bool = False,
+    subtitles_dir: Optional[str] = None,
+    subtitle_file: Optional[str] = None,
+    font_path: Optional[str] = None,
+    subtitle_font_size: Optional[int] = None,
 ) -> List[str]:
     """Lay metadata tu Web App va thuc thi Pipeline."""
     print(f"Dang lay thong tin render tu Web App voi index={start_index}...")
@@ -122,6 +127,9 @@ def run_pipeline(
 
     if not audios_dir:
         audios_dir = f"/kaggle/working/VoiceVNZeroTTS/projects/{project_id}/chapters"
+
+    if not subtitles_dir:
+        subtitles_dir = f"/kaggle/working/VoiceVNZeroTTS/projects/{project_id}/chapters/subtitles"
 
     video_file = video_info.get("game_path", "")
     title_pattern = video_info.get("title", f"Tap {start_index} | {name}")
@@ -198,6 +206,11 @@ def run_pipeline(
         keep_master_audio=keep_audio,
         rerender=rerender,
         rerender_preset=rerender_preset,
+        subtitle=subtitle,
+        subtitles_dir=subtitles_dir,
+        subtitle_file=subtitle_file,
+        font_path=font_path,
+        subtitle_font_size=subtitle_font_size,
     )
 
     try:
@@ -314,6 +327,42 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default="fastest",
         help="Preset encode khi dung --rerender (mac dinh: fastest)",
     )
+    parser.add_argument(
+        "--subtitle",
+        action="store_true",
+        default=False,
+        help="Bat tinh nang phu de burn-in tren video (chi ap dung khi dung --rerender)",
+    )
+    parser.add_argument(
+        "--no-subtitle",
+        action="store_false",
+        dest="subtitle",
+        help="Tat tinh nang phu de",
+    )
+    parser.add_argument(
+        "--subtitles-dir",
+        type=str,
+        default=None,
+        help="Thu muc chua file sub (.srt, .ass, .vtt) (mac dinh dung project_id: .../chapters/subtitles)",
+    )
+    parser.add_argument(
+        "--subtitle-file",
+        type=str,
+        default=None,
+        help="Duong dan file phu de don le (.srt, .ass, .vtt)",
+    )
+    parser.add_argument(
+        "--font-path",
+        type=str,
+        default=None,
+        help="Duong dan file font (.ttf) dung cho sub (mac dinh: fonts/BeeLeaveRegular.ttf)",
+    )
+    parser.add_argument(
+        "--subtitle-font-size",
+        type=int,
+        default=None,
+        help="Co chu phu de (mac dinh: tu dong tinh theo do phan giai video)",
+    )
 
     parser.add_argument(
         "--audios-dir", type=str, default=None, help="Ghi de thu muc audio (mac dinh dung project_id)"
@@ -370,6 +419,11 @@ def main() -> None:
             keep_comic_json=args.keep_comic_json,
             rerender=args.rerender,
             rerender_preset=args.rerender_preset,
+            subtitle=args.subtitle,
+            subtitles_dir=args.subtitles_dir,
+            subtitle_file=args.subtitle_file,
+            font_path=args.font_path,
+            subtitle_font_size=args.subtitle_font_size,
         )
     except Exception as exc:
         print(f"\n[LOI] {exc}", file=sys.stderr)

@@ -239,8 +239,10 @@ class VideoProcessor:
         bg_music: Optional[str] = None,
         bg_volume: str = "0.2",
         preset: str = "fastest",
+        subtitle_file: Optional[str] = None,
+        fonts_dir: Optional[str] = None,
     ) -> str:
-        """Rerender 1 lan duy nhat: [clips_before] + body(video_file lap + audio_segment)
+        """Rerender 1 lan duy nhat: [clips_before] + body(video_file lap + audio_segment + subtitle)
         + [clips_after] bang concat filter, khong tao file body trung gian."""
         params = get_video_stream_params(video_file)
         W, H, fps = params["width"], params["height"], params["fps"]
@@ -289,14 +291,25 @@ class VideoProcessor:
         for p in clips_before:
             add_clip(p)
 
-        # Body: video lap vo han (cat bang trim) + audio segment
+        # Body: video lap vo han (cat bang trim) + audio segment + subtitle burn-in (neu co)
         bv = n_inputs
         inputs.extend(["-stream_loop", "-1", "-i", video_file])
         n_inputs += 1
         ba = n_inputs
         inputs.extend(["-i", audio_segment])
         n_inputs += 1
-        filters.append(f"[{bv}:v]{vnorm},trim=duration={body_dur:.3f},setpts=PTS-STARTPTS[v{seg_i}]")
+
+        sub_filter = ""
+        if subtitle_file and os.path.exists(subtitle_file):
+            esc_sub = os.path.abspath(subtitle_file).replace("\\", "/").replace(":", "\\:")
+            if fonts_dir and os.path.exists(fonts_dir):
+                esc_fonts = os.path.abspath(fonts_dir).replace("\\", "/").replace(":", "\\:")
+                sub_filter = f",subtitles=filename='{esc_sub}':fontsdir='{esc_fonts}'"
+            else:
+                sub_filter = f",subtitles=filename='{esc_sub}'"
+            self.logger.info("Burn-in subtitle vao video body (group %d): %s", idx, subtitle_file)
+
+        filters.append(f"[{bv}:v]{vnorm},trim=duration={body_dur:.3f},setpts=PTS-STARTPTS{sub_filter}[v{seg_i}]")
         filters.append(f"[{ba}:a]{anorm},atrim=duration={body_dur:.3f},asetpts=PTS-STARTPTS[a{seg_i}]")
         segs.append(f"[v{seg_i}][a{seg_i}]")
         seg_i += 1
@@ -336,6 +349,8 @@ class VideoProcessor:
         info_video: Optional[str] = None,
         rerender: bool = False,
         rerender_preset: str = "fastest",
+        subtitle_file: Optional[str] = None,
+        fonts_dir: Optional[str] = None,
     ) -> str:
         """Xay dung video hoan chinh cho mot group bao gom:
         [Intro] -> [Video gioi thieu truyen] -> [Body TTS] -> [Outro]."""
@@ -359,6 +374,8 @@ class VideoProcessor:
             return self.build_group_video_rerender(
                 video_file, audio_segment, idx, duration,
                 before, after, bg_music, bg_volume, rerender_preset,
+                subtitle_file=subtitle_file,
+                fonts_dir=fonts_dir,
             )
 
         body_path = self.build_body(video_file, audio_segment, idx, duration=duration)

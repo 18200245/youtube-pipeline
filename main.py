@@ -124,6 +124,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--client-secrets-file", default="client_secrets.json")
     p.add_argument("--token-file", default="token.json")
 
+    p.add_argument("--rerender", action="store_true", default=False, help="Encode lai 1 lan khi ghep video (bo qua build body/concat copy)")
+    p.add_argument("--rerender-preset", choices=["fastest", "balanced", "quality"], default="fastest")
+    p.add_argument("--subtitle", action="store_true", default=False, help="Bat tinh nang burn-in phu de (chi ho tro voi --rerender)")
+    p.add_argument("--subtitles-dir", default=None, help="Thu muc chua file sub (.srt, .ass, .vtt)")
+    p.add_argument("--subtitle-file", default=None, help="File sub don le")
+    p.add_argument("--font-path", default=None, help="Duong dan font TTF (mac dinh: fonts/BeeLeaveRegular.ttf)")
+    p.add_argument("--subtitle-font-size", type=int, default=None, help="Co chu phu de")
+
     p.add_argument("--delete-final-video-after-upload", action="store_true")
     p.add_argument("--keep-master-audio", action="store_true")
     return p
@@ -159,6 +167,13 @@ def config_from_args(args: argparse.Namespace) -> PipelineConfig:
         auth_host_port=getattr(args, "auth_host_port", [8080, 8090]),
         delete_final_video_after_upload=args.delete_final_video_after_upload,
         keep_master_audio=args.keep_master_audio,
+        rerender=getattr(args, "rerender", False),
+        rerender_preset=getattr(args, "rerender_preset", "fastest"),
+        subtitle=getattr(args, "subtitle", False),
+        subtitles_dir=getattr(args, "subtitles_dir", None),
+        subtitle_file=getattr(args, "subtitle_file", None),
+        font_path=getattr(args, "font_path", None),
+        subtitle_font_size=getattr(args, "subtitle_font_size", None),
     )
 
 

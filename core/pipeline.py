@@ -8,8 +8,9 @@ from .audio import AudioProcessor, compute_groups
 from .auth import get_authenticated_service
 from .config import PipelineConfig, SafeDict
 from .constants import MAX_GROUP_SECONDS
+from .subtitle import SubtitleProcessor
 from .uploader import YouTubeUploader
-from .utils import format_hms, get_duration, safe_remove, setup_logger
+from .utils import format_hms, get_duration, get_video_stream_params, safe_remove, setup_logger
 from .video import VideoProcessor
 
 
@@ -61,6 +62,33 @@ class Pipeline:
 
         video_proc = VideoProcessor(self.work_dir, logger)
 
+        # --- Buoc 2.1: Xu ly phu de tong hop (neu bat option subtitle va rerender) ---
+        sub_proc = SubtitleProcessor(self.work_dir, logger)
+        master_subtitles = []
+        video_w, video_h = 1920, 1080
+        if cfg.video_file and os.path.exists(cfg.video_file):
+            try:
+                vparams = get_video_stream_params(cfg.video_file)
+                video_w, video_h = vparams["width"], vparams["height"]
+            except Exception as e:
+                logger.warning("Khong lay duoc thong so video_file: %s", e)
+
+        if cfg.subtitle:
+            if cfg.rerender:
+                logger.info("Dang tim va tong hop phu de...")
+                audio_files = audio_proc.list_audio_files(cfg.audios_dir)
+                master_subtitles = sub_proc.build_master_subtitles(
+                    audio_files=audio_files,
+                    subtitles_dir=cfg.subtitles_dir,
+                    single_subtitle_file=cfg.subtitle_file,
+                )
+                if master_subtitles:
+                    logger.info("Tong so cau phu de: %d", len(master_subtitles))
+                else:
+                    logger.warning("Da bat subtitle nhung khong tim thay file phu de phu hop.")
+            else:
+                logger.warning("Option subtitle chi ho tro khi bat rerender (--rerender). Bo qua phu de.")
+
         # --- Buoc 2.5: Render video gioi thieu truyen bang render.py (neu duoc bat) ---
         comic_json = cfg.resolved_comic_json()
         comic_template_str = None
@@ -107,6 +135,21 @@ class Pipeline:
 
             # --- Buoc 3: cat audio group + ghep video ---
             segment_audio = audio_proc.extract_segment(master_audio, g.start, g.duration, g.index_in_run)
+
+            # Trich xuat phu de rieng cho group neu co
+            group_sub_file = None
+            if master_subtitles:
+                group_sub_file = sub_proc.slice_group_subtitles(
+                    master_entries=master_subtitles,
+                    start=g.start,
+                    duration=g.duration,
+                    idx=g.index_in_run,
+                    width=video_w,
+                    height=video_h,
+                    font_name=cfg.font_name,
+                    font_size=cfg.subtitle_font_size,
+                )
+
             group_video = video_proc.build_group_video(
                 video_file=cfg.video_file,
                 audio_segment=segment_audio,
@@ -119,7 +162,12 @@ class Pipeline:
                 bg_volume=cfg.bg_music_volume,
                 rerender=cfg.rerender,
                 rerender_preset=cfg.rerender_preset,
+                subtitle_file=group_sub_file,
+                fonts_dir=cfg.resolved_font_dir(),
             )
+
+            if group_sub_file:
+                safe_remove(group_sub_file, logger)
 
             if temp_comic_to_clean:
                 safe_remove(temp_comic_to_clean, logger)

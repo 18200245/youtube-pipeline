@@ -47,6 +47,15 @@ class PipelineConfig:
     rerender: bool = False             # True = encode lai 1 lan khi ghep (bo qua build_body/copy)
     rerender_preset: str = "fastest"   # fastest | balanced | quality
 
+    # --- Subtitle (chi ap dung cho che do rerender) ---
+    subtitle: bool = False             # Bat/tat hien thi phu de burn-in tren video
+    subtitles_dir: Optional[str] = None # Thu muc chua file sub (mac dinh tim trong audios_dir)
+    subtitle_file: Optional[str] = None # File sub don le (.srt, .ass, .vtt)
+    font_path: Optional[str] = None    # Duong dan font .ttf (mac dinh: fonts/BeeLeaveRegular.ttf)
+    font_name: str = "Bee Leave"       # Ten font hien thi trong ASS
+    subtitle_font_size: Optional[int] = None # Co chu (mac dinh tu dong theo do phan giai video)
+
+
     # --- Nhac nen ---
     background_music: Optional[str] = None
     bg_music_volume: str = "0.2"       # he so tuyen tinh (vd 0.2) hoac dang dB (vd "-18dB")
@@ -107,4 +116,13 @@ class PipelineConfig:
         if os.path.exists(default_json):
             return default_json
         return None
+
+    def resolved_font_dir(self) -> Optional[str]:
+        if self.font_path and os.path.exists(self.font_path):
+            return os.path.dirname(os.path.abspath(self.font_path))
+        default_font_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fonts")
+        if os.path.exists(default_font_dir):
+            return default_font_dir
+        return None
+
 

@@ -20,6 +20,7 @@ from .utils import (
     safe_remove,
     setup_logger,
 )
+from .subtitle import SubtitleEntry, SubtitleProcessor, generate_ass_content, parse_subtitle_file
 from .video import VideoProcessor
 
 try:
